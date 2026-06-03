@@ -85,6 +85,9 @@ function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
           {isReels && <Field label="Imagem de fundo (opcional)">
             <ImageDrop value={s.image} onChange={v=>set({image:v})} label="Imagem de fundo"/>
           </Field>}
+          {isCarousel && onCover && <Field label="Imagem de fundo da capa (opcional)">
+            <ImageDrop value={s.image} onChange={v=>set({image:v})} label="Imagem da capa"/>
+          </Field>}
           {(isCarousel||isReels) && <Field label="Rodapé (canto inferior)">
             <TextInput value={s.footer||''} onChange={e=>set({footer:e.target.value})}/>
           </Field>}
@@ -98,7 +101,7 @@ function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
       {onCover && !isImage &&
         <CtrlSection title="ESTILO DE FUNDO" right={
           <span className="gh-mono" style={{ color:GH.mut, fontSize:9, letterSpacing:'.1em' }}>{PATTERNS.length} PADRÕES</span>}>
-          {isReels && s.image
+          {(isReels||isCarousel) && s.image
             ? <p className="gh-mono" style={{ color:GH.mut, fontSize:10, lineHeight:1.5, margin:0 }}>
                 Imagem de fundo ativa — remova-a acima para usar padrões ou cor sólida.</p>
             : <>
