@@ -10,7 +10,7 @@ const DEFAULT_STATE = {
   subtitle:'neste post', badge:'STATE OF PLAY', cta:'ARRASTA PRO LADO',
   accentWord:'',
   footer:'MÍDIA FÍSICA\nNEVER DIES', priceLabel:'R$ 349 · LACRADO',
-  titleSize:108, image:null, pageCount:4, current:0, patternOpacity:100,
+  titleSize:108, image:null, pageCount:4, current:0, patternOpacity:100, videoAudio:true,
   pages:[
     { title:'DRAGON QUEST XII', body:'Depois de 5 anos sem novidades, a Square Enix revelou oficialmente Beyond Dreams.', image:null },
     { title:'40 ANOS DE FRANQUIA', body:'O anúncio veio durante a celebração dos 40 anos da série.', image:null },
@@ -211,18 +211,29 @@ function App(){
     vid.src = pg.video; vid.playsInline = true; vid.loop = false; vid.preload = 'auto';
 
     // audio routed through WebAudio so it's captured but NOT sent to speakers
+    const wantAudio = s.videoAudio !== false;
     let ac=null, dest=null;
-    try{
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if(AC){ ac = new AC(); const node = ac.createMediaElementSource(vid);
-        dest = ac.createMediaStreamDestination(); node.connect(dest);
-        if(ac.state==='suspended') ac.resume(); }
-    }catch(e){ console.warn('sem áudio na exportação', e); }
+    if(wantAudio){
+      try{
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if(AC){ ac = new AC(); const node = ac.createMediaElementSource(vid);
+          dest = ac.createMediaStreamDestination(); node.connect(dest);
+          if(ac.state==='suspended') ac.resume(); }
+      }catch(e){ console.warn('sem áudio na exportação', e); }
+    }
 
     const stream = canvas.captureStream(30);
     if(dest) dest.stream.getAudioTracks().forEach(t=>stream.addTrack(t));
-    const mime = ['video/mp4;codecs=h264,aac','video/mp4','video/webm;codecs=vp9,opus',
-      'video/webm;codecs=vp8,opus','video/webm']
+    const hasAudio = !!dest;
+    // Prefer MP4/H.264 (+AAC) so the file plays on Windows & uploads to Instagram.
+    // Only fall back to WebM (Opus audio) when the browser can't record MP4.
+    const mp4  = hasAudio
+      ? ['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4;codecs=h264,aac','video/mp4']
+      : ['video/mp4;codecs=avc1.42E01E','video/mp4;codecs=h264','video/mp4'];
+    const webm = hasAudio
+      ? ['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm']
+      : ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'];
+    const mime = [...mp4, ...webm]
       .find(m=>{ try{ return MediaRecorder.isTypeSupported(m); }catch(e){ return false; } }) || '';
     let rec;
     try{ rec = new MediaRecorder(stream, mime?{ mimeType:mime, videoBitsPerSecond:9000000 }:undefined); }
@@ -241,7 +252,9 @@ function App(){
       try{ stream.getTracks().forEach(t=>t.stop()); }catch(e){}
       try{ ac && ac.close(); }catch(e){}
       recStopRef.current = null; setBusy(false);
-      flashToast('Vídeo exportado · '+ext.toUpperCase());
+      if(ext==='mp4') flashToast('Vídeo MP4 exportado · compatível');
+      else if(hasAudio) flashToast('WEBM exportado · áudio Opus — desligue o som p/ tocar no Windows/Insta');
+      else flashToast('WEBM (sem áudio) exportado');
     };
     const drawFrame = ()=>{
       drawVideoComposite(ctx, W, H, { s, pg, tag:vtag, pageIndex, vid, bgImg, logoImg });

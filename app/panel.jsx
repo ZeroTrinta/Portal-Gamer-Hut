@@ -99,6 +99,15 @@ function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
               <TextInput value={curPage.footer||''} placeholder="PRÉ-VENDA aberta agora na Gamer Hut"
                 onChange={e=>setPage({footer:e.target.value})}/>
             </Field>
+            <div style={{ background:GH.bg, border:`1px solid ${GH.lineSoft}`, borderRadius:9, padding:'14px 13px', marginBottom:14 }}>
+              <Toggle label="Som do trailer no vídeo" checked={s.videoAudio!==false}
+                onChange={v=>set({ videoAudio:v })}/>
+              <p className="gh-mono" style={{ color:GH.mut, fontSize:10, lineHeight:1.6, margin:'9px 0 0', letterSpacing:'.02em' }}>
+                Mantenha <span style={{ color:GH.white }}>ligado</span> para o vídeo sair em MP4 com áudio (quando o
+                navegador permite). Se o player do Windows acusar <span style={{ color:GH.white }}>áudio Opus</span> ou
+                o Instagram recusar o arquivo, <span style={{ color:GH.white }}>desligue o som</span> — o vídeo sai
+                limpo e toca em qualquer lugar.</p>
+            </div>
             <div style={{ display:'flex', gap:10, alignItems:'flex-start', background:GH.bg,
               border:`1px solid ${GH.lineSoft}`, borderRadius:9, padding:'12px 13px' }}>
               <span style={{ color:GH.orange, fontSize:13, lineHeight:1.3 }}>●</span>
