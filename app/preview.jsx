@@ -670,13 +670,23 @@ function PostStage({ s, pageIndex=0, stageRef, exporting=false }){
    CANVAS COMPOSITOR — used by the "Exportar vídeo" flow to draw
    the branded frame + the playing trailer to a <canvas> per frame.
    ============================================================ */
-function coverDraw(ctx, src, dx, dy, dw, dh){
+function coverDraw(ctx, src, dx, dy, dw, dh, inflate=0){
   const iw = src.videoWidth || src.naturalWidth || src.width;
   const ih = src.videoHeight || src.naturalHeight || src.height;
   if(!iw || !ih) return;
-  const sc = Math.max(dw/iw, dh/ih);
+  const sc = Math.max(dw/iw, dh/ih) * (1+inflate);
   const w = iw*sc, h = ih*sc;
   ctx.drawImage(src, dx+(dw-w)/2, dy+(dh-h)/2, w, h);
+}
+/* shrink font until the (uppercased) line fits maxW; returns the px size used */
+function fitFont(ctx, text, maxW, weight, family, startPx, minPx=30){
+  let px = startPx;
+  for(; px>minPx; px-=2){
+    ctx.font = `${weight} ${px}px ${family}`;
+    if(ctx.measureText(text).width <= maxW) break;
+  }
+  ctx.font = `${weight} ${px}px ${family}`;
+  return px;
 }
 function roundRectPath(ctx, x, y, w, h, r){
   ctx.beginPath();
@@ -704,7 +714,16 @@ function drawVideoComposite(ctx, W, H, o){
   const accent = tag.color, PAD = 70;
   ctx.clearRect(0,0,W,H);
   ctx.fillStyle = '#0B0B0A'; ctx.fillRect(0,0,W,H);
-  if(bgImg && bgImg.complete && bgImg.naturalWidth) coverDraw(ctx, bgImg, 0,0,W,H);
+  if(bgImg && bgImg.complete && bgImg.naturalWidth){
+    const br = blurPx(pg.imageBlur);
+    if(br>0){
+      ctx.save(); ctx.filter = `blur(${br.toFixed(1)}px)`;
+      coverDraw(ctx, bgImg, 0,0,W,H, br/200);   // inflate to hide the blur halo
+      ctx.restore();
+    } else {
+      coverDraw(ctx, bgImg, 0,0,W,H);
+    }
+  }
   const g = ctx.createLinearGradient(0,0,0,H);
   g.addColorStop(0,'rgba(8,8,7,.66)'); g.addColorStop(.34,'rgba(8,8,7,.40)');
   g.addColorStop(.62,'rgba(8,8,7,.46)'); g.addColorStop(1,'rgba(8,8,7,.86)');
@@ -719,7 +738,8 @@ function drawVideoComposite(ctx, W, H, o){
   ctx.fillStyle = tag.color; ctx.textAlign='left'; ctx.textBaseline='middle';
   ctx.fillText(counter, W-PAD-cw+16, 66+ch/2+1);
 
-  // eyebrow + title (centered)
+  // eyebrow + title (centered, auto-fit to width)
+  const maxTextW = W - 2*PAD;
   ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
   if(pg.eyebrow){
     ctx.font = '700 24px "Space Mono"'; ctx.fillStyle = accent;
@@ -727,13 +747,22 @@ function drawVideoComposite(ctx, W, H, o){
     ctx.fillText(pg.eyebrow.toUpperCase(), W/2, 212);
     if('letterSpacing' in ctx) ctx.letterSpacing = '0px';
   }
-  ctx.font = '900 80px "Archivo"'; ctx.fillStyle = '#F4F1EC';
-  ctx.fillText((pg.title||'').toUpperCase(), W/2, 300);
-  if(pg.accent){ ctx.fillStyle = accent; ctx.fillText(pg.accent.toUpperCase(), W/2, 386); }
+  const t1 = (pg.title||'').toUpperCase(), t2 = (pg.accent||'').toUpperCase();
+  ctx.fillStyle = '#F4F1EC';
+  const s1 = t1 ? fitFont(ctx, t1, maxTextW, 900, '"Archivo"', 80) : 0;
+  if(t1) ctx.fillText(t1, W/2, 300);
+  let titleBottom = t1 ? 340 : 250;
+  if(t2){
+    ctx.fillStyle = accent;
+    const s2 = fitFont(ctx, t2, maxTextW, 900, '"Archivo"', 80);
+    const y2 = 300 + Math.max(s1, 60)*0.96;
+    ctx.fillText(t2, W/2, y2);
+    titleBottom = y2 + 34;
+  }
 
   // horizontal 16:9 trailer card, centered between title and footer
   const cardW = W - 2*PAD, cardH = Math.round(cardW * 9/16), cardX = PAD;
-  const titleBottom = pg.accent ? 420 : 340, footerTop = H - 210;
+  const footerTop = H - 210;
   const cardTop = Math.round(titleBottom + Math.max(0, (footerTop - titleBottom - cardH)) / 2);
   ctx.save(); roundRectPath(ctx, cardX, cardTop, cardW, cardH, 26); ctx.clip();
   ctx.fillStyle = '#0C0C0B'; ctx.fillRect(cardX, cardTop, cardW, cardH);
