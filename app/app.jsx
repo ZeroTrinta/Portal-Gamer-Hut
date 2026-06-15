@@ -208,7 +208,7 @@ function App(){
     const bgImg  = pg.image ? Object.assign(new Image(), { src:pg.image }) : null;
     const logoImg = Object.assign(new Image(), { src:'assets/logo-white.png' });
     const vid = document.createElement('video');
-    vid.src = pg.video; vid.playsInline = true; vid.loop = false; vid.preload = 'auto';
+    vid.src = pg.video; vid.playsInline = true; vid.muted = true; vid.loop = false; vid.preload = 'auto';
 
     // audio routed through WebAudio so it's captured but NOT sent to speakers
     const wantAudio = s.videoAudio !== false;
@@ -283,14 +283,18 @@ function App(){
         loop();
       }
     };
+    vid.onloadedmetadata = ()=>{
+      const duration = vid.duration && isFinite(vid.duration) ? vid.duration : 120;
+      capTimer = setTimeout(finish, (duration + 3) * 1000);
+    };
     setVidProg({ p:0, r:0 });
     setBusy('vídeo');
     vid.onended = finish;
     vid.play().then(()=>{
-      try{ rec.start(1000); }catch(e){ console.error(e); }
+      if(wantAudio && ac && ac.state==='suspended') ac.resume();
+      try{ rec.start(250); }catch(e){ console.error(e); }
       drawFrame();
       startTicker();
-      capTimer = setTimeout(finish, 120000); // 2-min safety cap
     }).catch(err=>{
       console.error('play falhou', err);
       recStopRef.current = null; setBusy(false);
