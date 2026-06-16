@@ -93,7 +93,10 @@ function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
             </Field>
             <Field label="Arte do jogo (fundo)">
               <ImageDrop value={curPage.image} onChange={v=>setPage({image:v})} label="Arte de fundo"
-                blur={curPage.imageBlur} onBlur={v=>setPage({imageBlur:v})}/>
+                blur={curPage.imageBlur} onBlur={v=>setPage({imageBlur:v})}
+                zoom={curPage.imageZoom} onZoom={v=>setPage({imageZoom:v})}
+                imgX={curPage.imageX} onImgX={v=>setPage({imageX:v})}
+                imgY={curPage.imageY} onImgY={v=>setPage({imageY:v})}/>
             </Field>
             <Field label="Rodapé (chamada)">
               <TextInput value={curPage.footer||''} placeholder="PRÉ-VENDA aberta agora na Gamer Hut"
@@ -126,7 +129,10 @@ function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
             </Field>
             <Field label="Imagem do jogo (fundo)">
               <ImageDrop value={curPage.image} onChange={v=>setPage({image:v})}
-                blur={curPage.imageBlur} onBlur={v=>setPage({imageBlur:v})}/>
+                blur={curPage.imageBlur} onBlur={v=>setPage({imageBlur:v})}
+                zoom={curPage.imageZoom} onZoom={v=>setPage({imageZoom:v})}
+                imgX={curPage.imageX} onImgX={v=>setPage({imageX:v})}
+                imgY={curPage.imageY} onImgY={v=>setPage({imageY:v})}/>
             </Field>
           </>}
         </> : isQuiz ? <QuizFields s={s} set={set}/>
@@ -149,7 +155,10 @@ function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
           {isImage && <>
             <Field label="Imagem do jogo">
               <ImageDrop value={s.image} onChange={v=>set({image:v})}
-                blur={s.imageBlur} onBlur={v=>set({imageBlur:v})}/>
+                blur={s.imageBlur} onBlur={v=>set({imageBlur:v})}
+                zoom={s.imageZoom} onZoom={v=>set({imageZoom:v})}
+                imgX={s.imageX} onImgX={v=>set({imageX:v})}
+                imgY={s.imageY} onImgY={v=>set({imageY:v})}/>
             </Field>
             <Field label="Etiqueta de preço / status">
               <TextInput value={s.priceLabel||''} placeholder="R$ 349 · LACRADO" onChange={e=>set({priceLabel:e.target.value})}/>
@@ -157,11 +166,17 @@ function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
           </>}
           {isReels && <Field label="Imagem de fundo (opcional)">
             <ImageDrop value={s.image} onChange={v=>set({image:v})} label="Imagem de fundo"
-              blur={s.imageBlur} onBlur={v=>set({imageBlur:v})}/>
+              blur={s.imageBlur} onBlur={v=>set({imageBlur:v})}
+              zoom={s.imageZoom} onZoom={v=>set({imageZoom:v})}
+              imgX={s.imageX} onImgX={v=>set({imageX:v})}
+              imgY={s.imageY} onImgY={v=>set({imageY:v})}/>
           </Field>}
           {isCarousel && onCover && <Field label="Imagem de fundo da capa (opcional)">
             <ImageDrop value={s.image} onChange={v=>set({image:v})} label="Imagem da capa"
-              blur={s.imageBlur} onBlur={v=>set({imageBlur:v})}/>
+              blur={s.imageBlur} onBlur={v=>set({imageBlur:v})}
+              zoom={s.imageZoom} onZoom={v=>set({imageZoom:v})}
+              imgX={s.imageX} onImgX={v=>set({imageX:v})}
+              imgY={s.imageY} onImgY={v=>set({imageY:v})}/>
           </Field>}
           {(isCarousel||isReels) && <Field label="Rodapé (canto inferior)">
             <TextInput value={s.footer||''} onChange={e=>set({footer:e.target.value})}/>
@@ -302,7 +317,10 @@ function QuizFields({ s, set }){
       </Field>
       <Field label="Imagem de fundo (opcional)">
         <ImageDrop value={s.image} onChange={v=>set({ image:v })} label="Imagem de fundo"
-          blur={s.imageBlur} onBlur={v=>set({ imageBlur:v })}/>
+          blur={s.imageBlur} onBlur={v=>set({ imageBlur:v })}
+          zoom={s.imageZoom} onZoom={v=>set({ imageZoom:v })}
+          imgX={s.imageX} onImgX={v=>set({ imageX:v })}
+          imgY={s.imageY} onImgY={v=>set({ imageY:v })}/>
       </Field>
       {!esseou ? <>
         <Field label="Pergunta">
@@ -345,14 +363,20 @@ function QuizFields({ s, set }){
         </Field>
         <Field label="Opção A — imagem">
           <ImageDrop value={s.aImg} onChange={v=>set({ aImg:v })} label="Imagem A"
-            blur={s.aImgBlur} onBlur={v=>set({ aImgBlur:v })}/>
+            blur={s.aImgBlur} onBlur={v=>set({ aImgBlur:v })}
+            zoom={s.aImgZoom} onZoom={v=>set({ aImgZoom:v })}
+            imgX={s.aImgX} onImgX={v=>set({ aImgX:v })}
+            imgY={s.aImgY} onImgY={v=>set({ aImgY:v })}/>
         </Field>
         <Field label="Opção B — texto">
           <TextInput value={s.bLabel||''} onChange={e=>set({ bLabel:e.target.value })}/>
         </Field>
         <Field label="Opção B — imagem">
           <ImageDrop value={s.bImg} onChange={v=>set({ bImg:v })} label="Imagem B"
-            blur={s.bImgBlur} onBlur={v=>set({ bImgBlur:v })}/>
+            blur={s.bImgBlur} onBlur={v=>set({ bImgBlur:v })}
+            zoom={s.bImgZoom} onZoom={v=>set({ bImgZoom:v })}
+            imgX={s.bImgX} onImgX={v=>set({ bImgX:v })}
+            imgY={s.bImgY} onImgY={v=>set({ bImgY:v })}/>
         </Field>
         <Field label="Divisor (centro)">
           <TextInput value={s.vsWord||''} placeholder="OU" onChange={e=>set({ vsWord:e.target.value })}/>
@@ -401,7 +425,10 @@ function RankingFields({ s, set, setS }){
       </Field>
       <Field label="Imagem de fundo (opcional)">
         <ImageDrop value={s.image} onChange={v=>set({ image:v })} label="Imagem de fundo"
-          blur={s.imageBlur} onBlur={v=>set({ imageBlur:v })}/>
+          blur={s.imageBlur} onBlur={v=>set({ imageBlur:v })}
+          zoom={s.imageZoom} onZoom={v=>set({ imageZoom:v })}
+          imgX={s.imageX} onImgX={v=>set({ imageX:v })}
+          imgY={s.imageY} onImgY={v=>set({ imageY:v })}/>
       </Field>
     </>
   );
@@ -425,7 +452,10 @@ function ThumbFields({ s, set }){
       </Field>
       <Field label="Arte do jogo (fundo)">
         <ImageDrop value={s.image} onChange={v=>set({ image:v })} label="Arte do jogo"
-          blur={s.imageBlur} onBlur={v=>set({ imageBlur:v })}/>
+          blur={s.imageBlur} onBlur={v=>set({ imageBlur:v })}
+          zoom={s.imageZoom} onZoom={v=>set({ imageZoom:v })}
+          imgX={s.imageX} onImgX={v=>set({ imageX:v })}
+          imgY={s.imageY} onImgY={v=>set({ imageY:v })}/>
       </Field>
       <Field label="Etiqueta (canto inferior · opcional)">
         <TextInput value={s.priceLabel||''} placeholder="ex: 12 MIN · 4K" onChange={e=>set({ priceLabel:e.target.value })}/>

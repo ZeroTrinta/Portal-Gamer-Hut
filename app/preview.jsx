@@ -74,12 +74,27 @@ function PatternLayer({ kind, accent, base, opacity }){
   return <div style={{ position:'absolute', inset:0, pointerEvents:'none', ...st }}/>;
 }
 
-function ImageOrSlot({ src, label='ARRASTE A IMAGEM DO JOGO', style={}, blur=0 }){
+function ImageOrSlot({ src, label='ARRASTE A IMAGEM DO JOGO', style={}, blur=0, zoom=100, x=50, y=50 }){
   if(src){
     const r = blurPx(blur);
-    const fx = r>0 ? { filter:`blur(${r.toFixed(1)}px)`, transform:`scale(${(1 + r/300).toFixed(3)})` } : {};
-    return <img src={src} alt="" draggable="false"
-      style={{ width:'100%', height:'100%', objectFit:'cover', display:'block', ...fx, ...style }}/>;
+    const scale = Math.max(1, (zoom||100)/100);
+    const blurFix = r>0 ? (1 + r/300) : 1;
+    const finalScale = scale * blurFix;
+    const blurFilter = r>0 ? `blur(${r.toFixed(1)}px)` : undefined;
+    return (
+      <div style={{ width:'100%', height:'100%', overflow:'hidden', position:'relative', display:'block', ...style }}>
+        <img src={src} alt="" draggable="false" style={{
+          position:'absolute', top:0, left:0,
+          width:'100%', height:'100%',
+          objectFit:'cover',
+          objectPosition:`${x||50}% ${y||50}%`,
+          transform:`scale(${finalScale.toFixed(3)})`,
+          transformOrigin:`${x||50}% ${y||50}%`,
+          filter:blurFilter,
+          display:'block',
+        }}/>
+      </div>
+    );
   }
   return (
     <div style={{ width:'100%', height:'100%', display:'grid', placeItems:'center',
@@ -134,7 +149,7 @@ function ImageBody({ s, tag }){
   const logoCol = (s.ink && s.ink!=='auto') ? ink.logo : 'white';
   return (
     <div style={{ position:'absolute', inset:0, background:GH.bg, overflow:'hidden' }}>
-      <div style={{ position:'absolute', inset:0 }}><ImageOrSlot src={s.image} blur={s.imageBlur}/></div>
+      <div style={{ position:'absolute', inset:0 }}><ImageOrSlot src={s.image} blur={s.imageBlur} zoom={s.imageZoom} x={s.imageX} y={s.imageY}/></div>
       <Scrim from="rgba(0,0,0,.94)" h="66%"/>
       <div style={{ position:'absolute', top:0, left:0, right:0, padding:'64px 64px 0',
         display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
@@ -229,7 +244,7 @@ function VideoBody({ s, tag, pg, pageIndex, exporting }){
   return (
     <div style={{ position:'absolute', inset:0, background:GH.bg, overflow:'hidden' }}>
       <div style={{ position:'absolute', inset:0 }}>
-        <ImageOrSlot src={pg.image} blur={pg.imageBlur} label={`ARTE DO JOGO (FUNDO) · PÁG ${pageIndex+1}`}/></div>
+        <ImageOrSlot src={pg.image} blur={pg.imageBlur} zoom={pg.imageZoom} x={pg.imageX} y={pg.imageY} label={`ARTE DO JOGO (FUNDO) · PÁG ${pageIndex+1}`}/></div>
       <div style={{ position:'absolute', inset:0,
         background:'linear-gradient(180deg, rgba(8,8,7,.66) 0%, rgba(8,8,7,.40) 34%, rgba(8,8,7,.42) 60%, rgba(8,8,7,.82) 100%)' }}/>
       <div style={{ position:'absolute', inset:0, padding:'66px 70px 58px', display:'flex', flexDirection:'column' }}>
@@ -274,7 +289,7 @@ function CarouselBody({ s, tag, pageIndex, exporting }){
   if(pg.type==='video') return <VideoBody s={s} tag={tag} pg={pg} pageIndex={pageIndex} exporting={exporting}/>;
   return (
     <div style={{ position:'absolute', inset:0, background:GH.bg, overflow:'hidden' }}>
-      <div style={{ position:'absolute', inset:0 }}><ImageOrSlot src={pg.image} blur={pg.imageBlur} label={`IMAGEM · PÁG ${pageIndex+1}`}/></div>
+      <div style={{ position:'absolute', inset:0 }}><ImageOrSlot src={pg.image} blur={pg.imageBlur} zoom={pg.imageZoom} x={pg.imageX} y={pg.imageY} label={`IMAGEM · PÁG ${pageIndex+1}`}/></div>
       <Scrim from="rgba(0,0,0,.95)" h="70%"/>
       <div style={{ position:'absolute', top:0, left:0, right:0, padding:'60px 64px 0',
         display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
@@ -312,7 +327,7 @@ function CoverBody({ s, tag, arrastar=false, safe=false, exporting=false }){
   return (
     <div style={{ position:'absolute', inset:0, background:base, overflow:'hidden' }}>
       {hasImg
-        ? <><div style={{ position:'absolute', inset:0 }}><ImageOrSlot src={s.image} blur={s.imageBlur}/></div><Scrim from="rgba(0,0,0,.92)" h="70%"/></>
+        ? <><div style={{ position:'absolute', inset:0 }}><ImageOrSlot src={s.image} blur={s.imageBlur} zoom={s.imageZoom} x={s.imageX} y={s.imageY}/></div><Scrim from="rgba(0,0,0,.92)" h="70%"/></>
         : <PatternLayer kind={s.pattern==='solid'?'8bit':s.pattern} accent={s.fill?readableOn(tag.color):tag.color} base={base} opacity={s.patternOpacity}/>}
       {safe && s.showSafe && !exporting && <SafeGuide/>}
       <div style={{ position:'absolute', inset:0, padding:pad, display:'flex', flexDirection:'column' }}>
@@ -372,7 +387,7 @@ function ThumbBody({ s, tag, exporting }){
     <div style={{ position:'absolute', inset:0, background:base, overflow:'hidden' }}>
       {hasImg
         ? <>
-            <div style={{ position:'absolute', inset:0 }}><ImageOrSlot src={s.image} blur={s.imageBlur}/></div>
+            <div style={{ position:'absolute', inset:0 }}><ImageOrSlot src={s.image} blur={s.imageBlur} zoom={s.imageZoom} x={s.imageX} y={s.imageY}/></div>
             <div style={{ position:'absolute', inset:0, pointerEvents:'none',
               background:'linear-gradient(90deg, rgba(0,0,0,.92) 0%, rgba(0,0,0,.6) 40%, rgba(0,0,0,.12) 70%, rgba(0,0,0,0) 100%)' }}/>
             <div style={{ position:'absolute', left:0, right:0, bottom:0, height:'78%', pointerEvents:'none',
@@ -453,7 +468,7 @@ function QuizBody({ s, tag }){
   return (
     <div style={{ position:'absolute', inset:0, background:base, overflow:'hidden' }}>
       {hasImg
-        ? <><div style={{ position:'absolute', inset:0 }}><ImageOrSlot src={s.image} blur={s.imageBlur}/></div><FullScrim/></>
+        ? <><div style={{ position:'absolute', inset:0 }}><ImageOrSlot src={s.image} blur={s.imageBlur} zoom={s.imageZoom} x={s.imageX} y={s.imageY}/></div><FullScrim/></>
         : <PatternLayer kind={s.pattern} accent={fill?readableOn(tag.color):tag.color} base={base} opacity={s.patternOpacity}/>}
       <div style={{ position:'absolute', inset:0, padding:'72px 70px 148px', display:'flex', flexDirection:'column' }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
@@ -510,8 +525,8 @@ function EsseOuAquele({ s, txt, accent }){
           lineHeight:.96, letterSpacing:'-.02em', textWrap:'balance' }}>{s.question}</h1>}
       </div>
       <div style={{ marginTop:24, flex:1, position:'relative', display:'flex', flexDirection:'column', gap:16, minHeight:0 }}>
-        <OptionPanel label={s.aLabel} img={s.aImg} blur={s.aImgBlur} accent={accent}/>
-        <OptionPanel label={s.bLabel} img={s.bImg} blur={s.bImgBlur} accent={accent}/>
+        <OptionPanel label={s.aLabel} img={s.aImg} blur={s.aImgBlur} zoom={s.aImgZoom} imgX={s.aImgX} imgY={s.aImgY} accent={accent}/>
+        <OptionPanel label={s.bLabel} img={s.bImg} blur={s.bImgBlur} zoom={s.bImgZoom} imgX={s.bImgX} imgY={s.bImgY} accent={accent}/>
         <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', zIndex:3 }}>
           <span className="gh-pixel" style={{ width:84, height:84, borderRadius:'50%', display:'grid',
             placeItems:'center', background:accent, color:readableOn(accent), fontSize:26,
@@ -521,11 +536,11 @@ function EsseOuAquele({ s, txt, accent }){
     </div>
   );
 }
-function OptionPanel({ label, img, blur, accent }){
+function OptionPanel({ label, img, blur, zoom, imgX, imgY, accent }){
   return (
     <div style={{ flex:1, minHeight:0, position:'relative', borderRadius:18, overflow:'hidden',
       border:`2px solid ${hexA(accent,.5)}` }}>
-      <div style={{ position:'absolute', inset:0 }}><ImageOrSlot src={img} blur={blur} label="IMAGEM (OPCIONAL)"/></div>
+      <div style={{ position:'absolute', inset:0 }}><ImageOrSlot src={img} blur={blur} zoom={zoom} x={imgX} y={imgY} label="IMAGEM (OPCIONAL)"/></div>
       <Scrim from="rgba(0,0,0,.88)" h="78%"/>
       <div style={{ position:'absolute', left:0, right:0, bottom:0, padding:'0 34px 30px' }}>
         <span className="gh-display" style={{ color:'#F4F1EC', fontSize:54, lineHeight:1.02,
@@ -550,7 +565,7 @@ function RankingBody({ s, tag }){
   return (
     <div style={{ position:'absolute', inset:0, background:base, overflow:'hidden' }}>
       {hasImg
-        ? <><div style={{ position:'absolute', inset:0 }}><ImageOrSlot src={s.image} blur={s.imageBlur}/></div><FullScrim/></>
+        ? <><div style={{ position:'absolute', inset:0 }}><ImageOrSlot src={s.image} blur={s.imageBlur} zoom={s.imageZoom} x={s.imageX} y={s.imageY}/></div><FullScrim/></>
         : <PatternLayer kind={s.pattern} accent={fill?readableOn(tag.color):tag.color} base={base} opacity={s.patternOpacity}/>}
       <div style={{ position:'absolute', inset:0, padding:'72px 70px 148px', display:'flex', flexDirection:'column' }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
@@ -589,7 +604,7 @@ function ArrivalCard({ it, accent, txt, span }){
   return (
     <div style={{ position:'relative', borderRadius:16, overflow:'hidden', minHeight:0,
       border:`2px solid ${hexA(txt,.18)}`, gridColumn: span?'1 / -1':'auto' }}>
-      <div style={{ position:'absolute', inset:0 }}><ImageOrSlot src={it.image} blur={it.imageBlur} label="CAPA DO JOGO"/></div>
+      <div style={{ position:'absolute', inset:0 }}><ImageOrSlot src={it.image} blur={it.imageBlur} zoom={it.imageZoom} x={it.imageX} y={it.imageY} label="CAPA DO JOGO"/></div>
       <Scrim from="rgba(0,0,0,.92)" h="64%"/>
       {it.console && <span className="gh-pixel" style={{ position:'absolute', top:16, right:16,
         background:accent, color:readableOn(accent), padding:'9px 13px', fontSize:20, borderRadius:4,

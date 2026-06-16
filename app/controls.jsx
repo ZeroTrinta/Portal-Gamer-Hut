@@ -125,7 +125,7 @@ function Toggle({ label, checked, onChange }){
   );
 }
 
-function ImageDrop({ value, onChange, label='Imagem do jogo', blur, onBlur }){
+function ImageDrop({ value, onChange, label='Imagem do jogo', blur, onBlur, zoom, onZoom, imgX, onImgX, imgY, onImgY }){
   const id = useMemo(()=>'img-'+Math.random().toString(36).slice(2),[]);
   const onFile = f => { if(!f) return; const r=new FileReader(); r.onload=()=>onChange(r.result); r.readAsDataURL(f); };
   return (
@@ -136,7 +136,10 @@ function ImageDrop({ value, onChange, label='Imagem do jogo', blur, onBlur }){
         {value
           ? <div style={{ position:'relative' }}>
               <img src={value} alt="" style={{ width:'100%', height:120, objectFit:'cover', display:'block',
-                filter: blur?`blur(${(blur*0.18).toFixed(1)}px)`:'none' }}/>
+                objectPosition:`${imgX||50}% ${imgY||50}%`,
+                transform:`scale(${Math.max(1,(zoom||100)/100).toFixed(3)})`,
+                transformOrigin:`${imgX||50}% ${imgY||50}%`,
+                filter: blur?`blur(${((blur)*0.18).toFixed(1)}px)`:'none' }}/>
               <span className="gh-mono" style={{ position:'absolute', bottom:6, right:8, fontSize:10,
                 background:'rgba(0,0,0,.7)', color:GH.white, padding:'3px 7px', borderRadius:4 }}>TROCAR</span>
             </div>
@@ -150,7 +153,73 @@ function ImageDrop({ value, onChange, label='Imagem do jogo', blur, onBlur }){
         <button onClick={()=>onChange(null)} className="gh-mono" style={{ cursor:'pointer',
           background:'transparent', border:'none', color:GH.mut, fontSize:10, letterSpacing:'.1em' }}>✕ REMOVER</button>
       </div>}
-      {value && onBlur && <BlurSlider value={blur||0} onChange={onBlur}/>}
+      {value && (
+        <div style={{ marginTop:10, background:GH.bg, border:`1px solid ${GH.lineSoft}`, borderRadius:9, padding:'13px 13px 11px' }}>
+
+          {/* ZOOM */}
+          <div style={{ marginBottom:12 }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:7 }}>
+              <span className="gh-mono" style={{ color:GH.mut, fontSize:10, letterSpacing:'.14em' }}>ZOOM</span>
+              <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                <button onClick={()=>onZoom&&onZoom(100)} className="gh-mono" style={{ cursor:'pointer',
+                  padding:'3px 8px', borderRadius:5, fontSize:9, background:'transparent',
+                  color:GH.mut, border:`1px solid ${GH.lineSoft}`, letterSpacing:'.06em' }}>RESET</button>
+                <span className="gh-pixel" style={{ color:GH.orange, fontSize:11, minWidth:38, textAlign:'right' }}>{Math.round(zoom||100)}%</span>
+              </div>
+            </div>
+            <input type="range" min={100} max={300} step={1} value={zoom||100}
+              onChange={e=>onZoom&&onZoom(+e.target.value)} style={{ width:'100%', accentColor:GH.orange }}/>
+          </div>
+
+          {/* POSIÇÃO X */}
+          <div style={{ marginBottom:12 }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:7 }}>
+              <span className="gh-mono" style={{ color:GH.mut, fontSize:10, letterSpacing:'.14em' }}>POSIÇÃO HORIZONTAL</span>
+              <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                <button onClick={()=>onImgX&&onImgX(50)} className="gh-mono" style={{ cursor:'pointer',
+                  padding:'3px 8px', borderRadius:5, fontSize:9, background:'transparent',
+                  color:GH.mut, border:`1px solid ${GH.lineSoft}`, letterSpacing:'.06em' }}>CENTRO</button>
+                <span className="gh-pixel" style={{ color:GH.orange, fontSize:11, minWidth:38, textAlign:'right' }}>{Math.round(imgX||50)}%</span>
+              </div>
+            </div>
+            <input type="range" min={0} max={100} step={1} value={imgX||50}
+              onChange={e=>onImgX&&onImgX(+e.target.value)} style={{ width:'100%', accentColor:GH.orange }}/>
+          </div>
+
+          {/* POSIÇÃO Y */}
+          <div style={{ marginBottom:12 }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:7 }}>
+              <span className="gh-mono" style={{ color:GH.mut, fontSize:10, letterSpacing:'.14em' }}>POSIÇÃO VERTICAL</span>
+              <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                <button onClick={()=>onImgY&&onImgY(50)} className="gh-mono" style={{ cursor:'pointer',
+                  padding:'3px 8px', borderRadius:5, fontSize:9, background:'transparent',
+                  color:GH.mut, border:`1px solid ${GH.lineSoft}`, letterSpacing:'.06em' }}>CENTRO</button>
+                <span className="gh-pixel" style={{ color:GH.orange, fontSize:11, minWidth:38, textAlign:'right' }}>{Math.round(imgY||50)}%</span>
+              </div>
+            </div>
+            <input type="range" min={0} max={100} step={1} value={imgY||50}
+              onChange={e=>onImgY&&onImgY(+e.target.value)} style={{ width:'100%', accentColor:GH.orange }}/>
+          </div>
+
+          {/* DESFOQUE */}
+          {onBlur && (
+            <div style={{ paddingTop:10, borderTop:`1px solid ${GH.lineSoft}` }}>
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:(+blur||0)>0?8:0 }}>
+                <span className="gh-mono" style={{ color:GH.mut, fontSize:10, letterSpacing:'.14em' }}>DESFOQUE DO FUNDO</span>
+                <button onClick={()=>onBlur((+blur||0)>0?0:35)} className="gh-mono" style={{ cursor:'pointer',
+                  padding:'5px 11px', borderRadius:6, fontSize:10, fontWeight:700, letterSpacing:'.06em',
+                  background:(+blur||0)>0?GH.orange:'transparent', color:(+blur||0)>0?GH.ink:GH.mut,
+                  border:`1px solid ${(+blur||0)>0?GH.orange:GH.lineSoft}` }}>{(+blur||0)>0?'DESFOCADO':'DESFOCAR'}</button>
+              </div>
+              {(+blur||0)>0 && <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+                <input type="range" min={0} max={100} value={+blur||0}
+                  onChange={e=>onBlur(+e.target.value)} style={{ flex:1, accentColor:GH.orange }}/>
+                <span className="gh-pixel" style={{ color:GH.orange, fontSize:11, minWidth:42, textAlign:'right' }}>{Math.round(+blur||0)}%</span>
+              </div>}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
