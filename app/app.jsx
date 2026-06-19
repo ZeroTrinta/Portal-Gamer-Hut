@@ -80,6 +80,8 @@ function App(){
   const stageRef = useRef(null);
   const viewRef  = useRef(null);
   const recStopRef = useRef(null);
+  const dragRef  = useRef({ active:false, startX:0, startY:0, origX:50, origY:50 });
+  const [isDragging, setIsDragging] = useState(false);
 
   const set = useCallback((patch)=> setS(p=>({ ...p, ...patch })), []);
   useEffect(()=>{ try{
@@ -95,6 +97,51 @@ function App(){
   const dims = stageDims(s, pageIdx);
   const curPageObj = isCarousel && s.current>0 ? (s.pages[s.current-1]||null) : null;
   const isVideoPage = !!(curPageObj && curPageObj.type==='video');
+
+  // which image is "active" in the current view (for drag-to-pan)
+  const activeImg = isCarousel && s.current>0 ? curPageObj?.image : s.image;
+  const activeImgX = isCarousel && s.current>0 ? (curPageObj?.imageX??50) : (s.imageX??50);
+  const activeImgY = isCarousel && s.current>0 ? (curPageObj?.imageY??50) : (s.imageY??50);
+  const activeZoom = isCarousel && s.current>0 ? (curPageObj?.imageZoom??100) : (s.imageZoom??100);
+
+  const setActiveImgPos = useCallback((x, y) => {
+    if (isCarousel && s.current > 0) {
+      setS(p => {
+        const pages = p.pages.slice();
+        const idx = p.current - 1;
+        if (idx >= 0) pages[idx] = { ...pages[idx], imageX: x, imageY: y };
+        return { ...p, pages };
+      });
+    } else {
+      set({ imageX: x, imageY: y });
+    }
+  }, [isCarousel, s.current, set, setS]);
+
+  // drag-to-pan handlers
+  const onPreviewMouseDown = useCallback((e) => {
+    if (!activeImg) return;
+    e.preventDefault();
+    const cx = e.clientX, cy = e.clientY;
+    dragRef.current = { active:true, startX:cx, startY:cy, origX:activeImgX, origY:activeImgY };
+    setIsDragging(true);
+    const onMove = (ev) => {
+      if (!dragRef.current.active) return;
+      const dx = ev.clientX - dragRef.current.startX;
+      const dy = ev.clientY - dragRef.current.startY;
+      const sw = dims.w * scale, sh = dims.h * scale;
+      const nx = Math.max(0, Math.min(100, dragRef.current.origX - (dx / sw * 100)));
+      const ny = Math.max(0, Math.min(100, dragRef.current.origY - (dy / sh * 100)));
+      setActiveImgPos(nx, ny);
+    };
+    const onUp = () => {
+      dragRef.current.active = false;
+      setIsDragging(false);
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  }, [activeImg, activeImgX, activeImgY, dims.w, dims.h, scale, setActiveImgPos]);
 
   // fit-to-view scaling
   useEffect(()=>{
@@ -324,6 +371,18 @@ function App(){
                 transformOrigin:'top left', boxShadow:'0 40px 120px rgba(0,0,0,.6)' }}>
                 <PostStage s={s} pageIndex={pageIdx} stageRef={stageRef}/>
               </div>
+              {/* drag-to-pan overlay */}
+              {activeImg && (
+                <div
+                  onMouseDown={onPreviewMouseDown}
+                  title={activeZoom>100 ? 'Arraste para reposicionar a imagem' : 'Aumente o zoom para reposicionar'}
+                  style={{
+                    position:'absolute', inset:0, zIndex:5,
+                    cursor: !activeImg ? 'default' : isDragging ? 'grabbing' : activeZoom>100 ? 'grab' : 'zoom-in',
+                    userSelect:'none',
+                  }}
+                />
+              )}
             </div>
             <PreviewBar s={s} dims={dims} setS={setS} isCarousel={isCarousel}/>
           </div>
