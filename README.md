@@ -19,6 +19,12 @@ Depois abra `http://localhost:8080`.
 
 ## Modelos disponíveis
 
+- **Modelo Black Friday** — carrossel de 1–8 ofertas em 1080×1350. Cada página
+  tem arte do jogo ao fundo (com zoom e posição), nome, preço anterior riscado,
+  preço promocional em destaque e condição opcional. A cor segue a categoria.
+  Selecione o modelo no Studio, preencha os preços e use **Exportar PNG** ou
+  **Todas**. Os preços não são consultados automaticamente.
+
 - **Carrossel** — 3–5 páginas sequenciais (capa + conteúdo). Inclui o tipo de
   página **Vídeo**: card horizontal 16:9 com trailer tocando e **exportação em
   vídeo** (canvas + MediaRecorder, com áudio).

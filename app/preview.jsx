@@ -667,6 +667,7 @@ function PostStage({ s, pageIndex=0, stageRef, exporting=false }){
   let body;
   if(s.template==='block')    body = <BlockBody s={s} tag={tag}/>;
   else if(s.template==='image') body = <ImageBody s={s} tag={tag}/>;
+  else if(s.template==='blackfriday') body = <BlackFridayBody s={s} tag={tag} pageIndex={pageIndex}/>;
   else if(s.template==='carousel') body = <CarouselBody s={s} tag={tag} pageIndex={pageIndex} exporting={exporting}/>;
   else if(s.template==='quiz') body = <QuizBody s={s} tag={tag}/>;
   else if(s.template==='ranking') body = <RankingBody s={s} tag={tag}/>;
@@ -801,3 +802,30 @@ function drawVideoComposite(ctx, W, H, o){
 }
 
 Object.assign(window, { PostStage, stageDims, drawVideoComposite });
+
+
+/* One independently editable offer per carousel page. */
+function BlackFridayBody({ s, tag, pageIndex }){
+  const offer = pageIndex===0 ? s : (s.pages[pageIndex-1]||{});
+  const title = offer.title||'NOME DO JOGO';
+  const price = offer.salePrice||'PREÇO PROMOCIONAL';
+  const titleSize = Math.min(s.titleSize||92, title.length>70?64:title.length>42?78:104);
+  return <div style={{position:'absolute',inset:0,background:GH.bg,overflow:'hidden'}}>
+    <div style={{position:'absolute',inset:0}}><ImageOrSlot src={offer.image} blur={offer.imageBlur} zoom={offer.imageZoom} x={offer.imageX} y={offer.imageY} label="ARTE DO JOGO"/></div>
+    <div style={{position:'absolute',inset:0,background:'linear-gradient(180deg,rgba(0,0,0,.65),transparent 32%,rgba(0,0,0,.8) 60%,#0B0B0A 94%)'}}/>
+    <div style={{position:'absolute',top:60,left:64,right:64,display:'flex',justifyContent:'space-between',alignItems:'center',gap:24}}>
+      <span className="gh-display" style={{background:tag.color,color:readableOn(tag.color),padding:'18px 26px',fontSize:42,letterSpacing:'-.02em'}}>BLACK FRIDAY</span>
+      <span className="gh-mono" style={{color:GH.white,fontSize:24}}>{String(pageIndex+1).padStart(2,'0')} / {String(s.pageCount).padStart(2,'0')}</span>
+    </div>
+    <div style={{position:'absolute',left:64,right:64,bottom:165,display:'flex',flexDirection:'column',gap:24}}>
+      <h2 className="gh-display" style={{margin:0,color:GH.white,fontSize:titleSize,lineHeight:1.04,letterSpacing:'-.035em',overflowWrap:'anywhere',textShadow:'0 4px 24px #000'}}>{title}</h2>
+      <div style={{borderLeft:`8px solid ${tag.color}`,background:'rgba(11,11,10,.9)',padding:'26px 32px'}}>
+        {offer.oldPrice && <div className="gh-body" style={{color:'#C9C5C0',fontSize:36,overflowWrap:'anywhere'}}>DE <del style={{textDecorationThickness:3}}>{offer.oldPrice}</del></div>}
+        <div className="gh-mono" style={{color:GH.white,fontSize:22,marginTop:12}}>POR</div>
+        <div className="gh-display" style={{color:tag.color,fontSize:price.length>16?54:price.length>11?76:112,lineHeight:1.08,letterSpacing:'-.04em',overflowWrap:'anywhere'}}>{price}</div>
+        {offer.offerNote && <p className="gh-body" style={{margin:'16px 0 0',color:GH.white,fontSize:25,lineHeight:1.3,overflowWrap:'anywhere'}}>{offer.offerNote}</p>}
+      </div>
+    </div>
+    <LogoFooter onImage/>
+  </div>;
+}

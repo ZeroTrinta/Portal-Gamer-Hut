@@ -47,6 +47,7 @@ const DEFAULT_STATE = {
 };
 
 const PRESETS = {
+  blackfriday: { template:'blackfriday', tagId:'blackfriday', fill:false, ink:'white', titleSize:92 },
   block:    { template:'block', tagId:'pre-venda', pattern:'solid', fill:true, eyebrow:'CHEGOU NA LOJA',
               title:'MÍDIA FÍSICA NEVER DIES', subtitle:'Drop toda sexta · estoque limitado', titleSize:120 },
   image:    { template:'image', tagId:'lancamento', pattern:'solid', fill:false, eyebrow:'JÁ DISPONÍVEL',
@@ -67,8 +68,18 @@ const PRESETS = {
 };
 
 function loadState(){
-  try{ const r = localStorage.getItem('gh-studio'); if(r) return { ...DEFAULT_STATE, ...JSON.parse(r) }; }catch(e){}
-  return DEFAULT_STATE;
+  try{
+    const raw = JSON.parse(localStorage.getItem('gh-studio')||'null');
+    if(!raw || typeof raw!=='object' || Array.isArray(raw)) return DEFAULT_STATE;
+    const state = { ...DEFAULT_STATE, ...raw };
+    if(!TEMPLATES.some(t=>t.id===state.template)) state.template='carousel';
+    const minPages = state.template==='blackfriday'?1:3;
+    state.pageCount=Math.max(minPages,Math.min(8,Math.trunc(Number(state.pageCount))||4));
+    state.current=Math.max(0,Math.min(state.pageCount-1,Math.trunc(Number(state.current))||0));
+    state.pages=Array.isArray(raw.pages)?raw.pages.map(p=>p&&typeof p==='object'?p:{}):DEFAULT_STATE.pages;
+    while(state.pages.length<state.pageCount-1) state.pages.push({title:'',body:'',image:null});
+    return state;
+  }catch(e){ return DEFAULT_STATE; }
 }
 
 function App(){
@@ -89,14 +100,14 @@ function App(){
     localStorage.setItem('gh-studio', JSON.stringify(safe));
   }catch(e){} }, [s]);
 
-  const tpl = TEMPLATES.find(t=>t.id===s.template);
+  const tpl = TEMPLATES.find(t=>t.id===s.template) || TEMPLATES.find(t=>t.id==='carousel');
   const tag = TAGS.find(t=>t.id===s.tagId) || TAGS[0];
-  const isCarousel = s.template==='carousel';
+  const isCarousel = (s.template==='carousel'||s.template==='blackfriday');
   const onCover = !isCarousel || s.current===0;
   const pageIdx = isCarousel ? s.current : 0;
   const dims = stageDims(s, pageIdx);
   const curPageObj = isCarousel && s.current>0 ? (s.pages[s.current-1]||null) : null;
-  const isVideoPage = !!(curPageObj && curPageObj.type==='video');
+  const isVideoPage = s.template==='carousel' && !!(curPageObj && curPageObj.type==='video');
 
   // which image is "active" in the current view (for drag-to-pan)
   const activeImg = isCarousel && s.current>0 ? curPageObj?.image : s.image;
@@ -159,7 +170,7 @@ function App(){
   const pickTemplate = (id)=>{
     if(id===s.template) return;
     const p = PRESETS[id];
-    if(p) set({ ...p, current:0 }); else set({ template:id, current:0 });
+    if(p) set({ ...p, current:0 }); else set({ template:id, current:0, ...(id==='carousel'?{pageCount:Math.max(3,s.pageCount)}:{}) });
   };
 
   const flashToast = (msg)=>{ setToast(msg); setTimeout(()=>setToast(null), 2600); };
@@ -195,23 +206,24 @@ function App(){
     document.body.appendChild(host);
     const root = ReactDOM.createRoot(host);
     root.render(<PostStage s={state} pageIndex={pageIndex} exporting={true}/>);
+    try {
     await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
     const node = host.querySelector('[data-stage]');
     await Promise.all([...host.querySelectorAll('img')].map(im=>
-      im.complete && im.naturalWidth ? Promise.resolve()
-        : new Promise(res=>{ im.onload=res; im.onerror=res; })));
+      im.complete ? Promise.resolve()
+        : new Promise(res=>{
+          const done=()=>{ clearTimeout(timer); im.onload=null; im.onerror=null; res(); };
+          const timer=setTimeout(done,15000); im.onload=done; im.onerror=done;
+        })));
     await document.fonts.ready;
     await new Promise(r=>setTimeout(r,60));
-    let dataUrl;
-    try{
-      dataUrl = await htmlToImage.toPng(node, {
+      return await htmlToImage.toPng(node, {
         width:node.offsetWidth, height:node.offsetHeight, pixelRatio:1,
         backgroundColor:'#0B0B0A', fontEmbedCSS,   // NOTE: no cacheBust — it breaks logo PNG fetch
       });
     } finally {
       root.unmount(); host.remove();
     }
-    return dataUrl;
   }
   function triggerDownload(dataUrl, name){
     const a = document.createElement('a'); a.download = name; a.href = dataUrl; a.click();
@@ -233,7 +245,7 @@ function App(){
     try{
       for(let i=0;i<s.pageCount;i++){
         const url = await captureToDataUrl(s, i);
-        triggerDownload(url, `gamerhut-carrossel-p${i+1}.png`);
+        triggerDownload(url, `gamerhut-${s.template}-p${i+1}.png`);
         await new Promise(r=>setTimeout(r,180));
       }
       flashToast(s.pageCount+' páginas exportadas');
@@ -457,7 +469,7 @@ function TopBar({ s, dims, tag, busy, isVideoPage, onExport, onExportAll, onExpo
                 fontSize:12, fontWeight:700, letterSpacing:'.04em' }}>● EXPORTAR VÍDEO</button>
             </>
           : <>
-              {s.template==='carousel' &&
+              {(s.template==='carousel'||s.template==='blackfriday') &&
                 <button onClick={onExportAll} disabled={busy} className="gh-mono" style={{ cursor:'pointer',
                   background:'transparent', color:GH.white, border:`1px solid ${GH.lineSoft}`, padding:'9px 14px',
                   borderRadius:8, fontSize:12, fontWeight:700 }}>↓ TODAS</button>}
