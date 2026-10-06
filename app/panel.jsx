@@ -3,7 +3,8 @@
    ============================================================ */
 
 function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
-  const isCarousel = s.template==='carousel';
+  const isBlackFriday = s.template==='blackfriday';
+  const isCarousel = s.template==='carousel'||isBlackFriday;
   const isImage    = s.template==='image';
   const isReels    = s.template==='reels';
   const isBlock    = s.template==='block';
@@ -41,7 +42,7 @@ function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
       {/* CAROUSEL page manager */}
       {isCarousel &&
         <CtrlSection title="PÁGINAS" right={
-          <Stepper label="" value={s.pageCount} min={3} max={8}
+          <Stepper label="" value={s.pageCount} min={isBlackFriday?1:3} max={8}
             onChange={n=>setS(p=>{
               const pages = p.pages.slice();
               while(pages.length < n-1) pages.push({ title:'', body:'', image:null });
@@ -54,7 +55,7 @@ function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
                 cursor:'pointer', flex:'1 0 28%', padding:'9px 0', borderRadius:7, fontSize:11, fontWeight:700,
                 background:i===s.current?GH.orange:GH.bg, color:i===s.current?GH.ink:GH.white,
                 border:`1px solid ${i===s.current?GH.orange:GH.lineSoft}` }}>
-                {i===0?'CAPA':'P'+(i+1)}
+                {isBlackFriday?'OFERTA '+(i+1):i===0?'CAPA':'P'+(i+1)}
               </button>
             ))}
           </div>
@@ -63,7 +64,7 @@ function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
       {/* CONTENT */}
       <CtrlSection title={isCarousel ? (onCover?'CONTEÚDO · CAPA':'CONTEÚDO · PÁGINA '+(pageIdx+1)) : 'CONTEÚDO'}>
         {/* carousel content page */}
-        {isCarousel && !onCover ? <>
+        {isBlackFriday ? <BlackFridayFields offer={onCover?s:curPage} setOffer={onCover?set:setPage}/> : isCarousel && !onCover ? <>
           <div style={{ marginBottom:18 }}>
             <Segmented value={curPage.type==='video'?'video':'standard'} onChange={v=>{
               if(v==='video') setPage({ type:'video',
@@ -188,7 +189,7 @@ function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
       </CtrlSection>
 
       {/* STYLE */}
-      {onCover && !isImage &&
+      {onCover && !isImage && !isBlackFriday &&
         <CtrlSection title="ESTILO DE FUNDO" right={
           <span className="gh-mono" style={{ color:GH.mut, fontSize:9, letterSpacing:'.1em' }}>{PATTERNS.length} PADRÕES</span>}>
           {(isReels||isCarousel||isQuiz||isRanking||isThumb) && s.image
@@ -230,7 +231,7 @@ function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
         </CtrlSection>}
 
       {/* INK — text + logo color */}
-      {((onCover && !isBlock) || isImage) &&
+      {!isBlackFriday && ((onCover && !isBlock) || isImage) &&
         <CtrlSection title="COR DO TEXTO / LOGO">
           <Segmented value={s.ink||'auto'} onChange={v=>set({ink:v})} options={[
             {id:'auto', label:'AUTO'}, {id:'white', label:'BRANCO'}, {id:'black', label:'PRETO'} ]}/>
@@ -240,7 +241,7 @@ function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
         </CtrlSection>}
 
       {/* TYPE */}
-      {onCover &&
+      {(onCover || isBlackFriday) &&
         <CtrlSection title="TIPOGRAFIA" right={
           <span className="gh-pixel" style={{ color:GH.orange, fontSize:11 }}>{s.titleSize}px</span>}>
           <input type="range" min={64} max={172} value={s.titleSize}
@@ -516,3 +517,20 @@ function ArrivalsFields({ s, set, setS }){
 }
 
 Object.assign(window, { Controls });
+
+
+function BlackFridayFields({ offer, setOffer }){
+  return <>
+    <Field label="Nome do jogo"><TextArea value={offer.title||''} onChange={e=>setOffer({title:e.target.value})}/></Field>
+    <Field label="Preço anterior (riscado)"><TextInput value={offer.oldPrice||''} placeholder="R$ 349,90" onChange={e=>setOffer({oldPrice:e.target.value})}/></Field>
+    <Field label="Preço promocional"><TextInput value={offer.salePrice||''} placeholder="R$ 199,90" onChange={e=>setOffer({salePrice:e.target.value})}/></Field>
+    <Field label="Condição da oferta (opcional)"><TextInput value={offer.offerNote||''} placeholder="À vista no Pix · enquanto durarem os estoques" onChange={e=>setOffer({offerNote:e.target.value})}/></Field>
+    <Field label="Arte do jogo (fundo)">
+      <ImageDrop value={offer.image} onChange={v=>setOffer({image:v})}
+        blur={offer.imageBlur} onBlur={v=>setOffer({imageBlur:v})}
+        zoom={offer.imageZoom} onZoom={v=>setOffer({imageZoom:v})}
+        imgX={offer.imageX} onImgX={v=>setOffer({imageX:v})}
+        imgY={offer.imageY} onImgY={v=>setOffer({imageY:v})}/>
+    </Field>
+  </>;
+}

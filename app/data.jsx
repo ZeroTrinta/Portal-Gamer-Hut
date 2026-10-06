@@ -20,6 +20,7 @@ const GH = {
 /* The 8 category tags. Each drives accent color + seal word.
    Extensible: add objects here and the whole app adapts. */
 const TAGS = [
+  { id:'blackfriday', label:'BLACK FRIDAY', seal:'BLACK FRIDAY', color:'#E8643C', ink:'#0B0B0A' },
   { id:'noticias',   label:'NOTÍCIAS',   seal:'NEWS',   color:'#E3B53E', ink:'#0B0B0A' },
   { id:'pre-venda',  label:'PRÉ-VENDA',  seal:'PRÉ',    color:'#E23B2E', ink:'#F4F1EC' },
   { id:'restoque',   label:'RESTOQUE',   seal:'RESTOCK',color:'#2E9D5B', ink:'#0B0B0A' },
@@ -33,6 +34,7 @@ const TAGS = [
 /* The generation templates */
 const TEMPLATES = [
   { id:'carousel', label:'CARROSSEL',      ratio:'4:5', w:1080, h:1350, note:'3–5 páginas sequenciais' },
+  { id:'blackfriday', label:'MODELO BLACK FRIDAY', ratio:'4:5', w:1080, h:1350, note:'Carrossel de ofertas · de / por' },
   { id:'block',    label:'POST BLOCADO',   ratio:'4:5', w:1080, h:1350, note:'Tipografia forte, cor sólida' },
   { id:'image',    label:'POST C/ IMAGEM', ratio:'4:5', w:1080, h:1350, note:'Texto + imagem em destaque' },
   { id:'quiz',     label:'QUIZ',           ratio:'4:5', w:1080, h:1350, note:'Pergunta ou “esse ou aquele”' },
