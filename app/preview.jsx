@@ -654,6 +654,7 @@ function ArrivalsBody({ s, tag }){
    switch to a 9:16 Stories format (1080×1920) */
 function stageDims(s, pageIndex=0){
   const tpl = TEMPLATES.find(t=>t.id===s.template) || TEMPLATES[0];
+  if(s.template==='bfbanner' && s.bannerFormat==='mobile') return {w:600,h:1269,ratio:'600:1269'};
   if((s.template==='block'||s.template==='quiz'||s.template==='ranking'||s.template==='arrivals') && s.format==='stories'){
     return { w:1080, h:1920, ratio:'9:16' };
   }
@@ -831,34 +832,52 @@ function BlackFridayBody({ s, tag, pageIndex }){
   </div>;
 }
 
-/* Fixed desktop artboard. Separate fields preserve carousel offers. */
+/* Campaign banners: independently composed desktop and mobile artboards. */
 function BlackFridayBanner({s,tag}){
+  const mobile=s.bannerFormat==='mobile';
   const multi=s.bannerMode==='games';
   const count=multi?Math.max(1,Math.min(5,s.bannerCount||5)):1;
   const games=Array.from({length:count},(_,i)=>(s.bannerGames||[])[i]||{});
-  const heading=s.bannerTitle??'BLACK FRIDAY';
-  const subtitle=s.bannerSubtitle??'SEU PRÓXIMO JOGO ESTÁ AQUI';
-  return <div style={{position:'absolute',inset:0,background:'#0B0B0A',color:GH.white,overflow:'hidden'}}>
+  const heading=s.bannerTitle??'BLACK';
+  const second=s.bannerSecondLine??'FÍSICO';
+  const subtitle=s.bannerSubtitle??'Ofertas exclusivas para completar sua coleção';
+  const signature=s.bannerSignature??'Em novembro, o jogo é seu';
+  const cta=s.bannerCta??'CONFIRA AS OFERTAS';
+  const orange=tag.color;
+  const hasOffer=!!(s.bannerDeal||s.bannerOldPrice||s.bannerPrice);
+  const left=mobile?32:48, copyWidth=mobile?536:560;
+  const glow=`0 0 12px ${orange}, 0 0 34px ${orange}66`;
+  const fitted=(text,base,width)=>Math.min(base,width/Math.max(1,text.length*.78));
+  const imgHeight=mobile?(count===5?160:count===1?345:285):290;
+  const textStyle={overflow:'hidden',overflowWrap:'anywhere'};
+  return <div style={{position:'absolute',inset:0,background:'#070707',color:GH.white,overflow:'hidden'}}>
     {s.bannerImage && <div style={{position:'absolute',inset:0}}><ImageOrSlot src={s.bannerImage} zoom={s.bannerZoom} x={s.bannerX} y={s.bannerY}/></div>}
-    <div style={{position:'absolute',inset:0,background:'linear-gradient(90deg,#0B0B0A 0%,rgba(11,11,10,.96) 27%,rgba(11,11,10,.28) 72%,rgba(11,11,10,.5))'}}/>
-    <div style={{position:'absolute',right:-80,top:-150,width:750,height:750,border:`2px solid ${tag.color}`,transform:'rotate(-18deg)',opacity:.35}}/>
-    <div data-banner-copy style={{position:'absolute',left:48,top:30,width:multi?485:610}}>
-      <div className="gh-mono" style={{fontSize:12,letterSpacing:4,color:tag.color,marginBottom:12}}>GAMER HUT / OFERTAS ESPECIAIS</div>
-      <h1 data-banner-text className="gh-display" style={{fontSize:heading.length>25?42:multi?64:74,lineHeight:.95,margin:0,color:tag.color,overflowWrap:'anywhere',maxHeight:145,overflow:'hidden'}}>{heading}</h1>
-      <div data-banner-text className="gh-display" style={{fontSize:subtitle.length>55?20:26,lineHeight:1.12,marginTop:13,maxHeight:60,overflow:'hidden',overflowWrap:'anywhere'}}>{subtitle}</div>
-      <div style={{display:'flex',gap:14,alignItems:'center',marginTop:14,flexWrap:'wrap'}}>
-        {s.bannerDeal && <span className="gh-display" style={{background:tag.color,color:readableOn(tag.color),fontSize:23,padding:'6px 12px',maxWidth:'100%',overflowWrap:'anywhere'}}>{s.bannerDeal}</span>}
-        {(s.bannerOldPrice||s.bannerPrice) && <span className="gh-body" style={{fontSize:20}}>{s.bannerOldPrice && <del style={{color:'#bbb',marginRight:10}}>{s.bannerOldPrice}</del>}<strong style={{fontSize:30}}>{s.bannerPrice}</strong></span>}
-      </div>
-      {(s.bannerCta??'APROVEITE AS OFERTAS') && <div className="gh-mono" style={{fontSize:13,fontWeight:700,marginTop:16,letterSpacing:1}}>{s.bannerCta??'APROVEITE AS OFERTAS'} →</div>}
+    <div style={{position:'absolute',inset:0,background:mobile?'linear-gradient(180deg,rgba(0,0,0,.85),rgba(0,0,0,.4) 55%,#060606)':'linear-gradient(90deg,#070707 0%,rgba(7,7,7,.9) 35%,rgba(0,0,0,.2))'}}/>
+    <div style={{position:'absolute',inset:0,background:`radial-gradient(ellipse at ${mobile?'50% 70%':'77% 85%'},${orange}55,transparent 42%),repeating-linear-gradient(125deg,transparent 0 5px,rgba(255,255,255,.012) 6px 7px)`}}/>
+    <div style={{position:'absolute',left:mobile?0:640,right:0,top:mobile?960:355,height:2,background:orange,boxShadow:glow}}/>
+    <div style={{position:'absolute',left,top:mobile?36:22,width:copyWidth,display:'flex',alignItems:'center',gap:18}}>
+      <div style={{height:1,flex:1,background:orange}}/><Lockup color="orange" h={mobile?46:33}/><div style={{height:1,flex:1,background:orange}}/>
     </div>
-    <div style={{position:'absolute',left:multi?570:790,right:48,top:32,height:310,display:'flex',gap:14,justifyContent:'center',alignItems:'center'}}>
-      {games.map((g,i)=><div key={i} style={{flex:1,minWidth:0,maxWidth:multi?340:550,textAlign:'center'}}>
-        {g.image ? <img src={g.image} alt="" style={{width:'100%',height:multi?258:300,objectFit:'contain',filter:'drop-shadow(0 12px 14px rgba(0,0,0,.65))'}}/> : !s.bannerImage && <div style={{height:multi?258:300,border:`1px dashed ${tag.color}`,display:'grid',placeItems:'center',color:tag.color,fontSize:14}}>MOCKUP {i+1}</div>}
-        {g.name && <div data-banner-text className="gh-body" style={{fontSize:count>3?14:18,fontWeight:700,marginTop:8,lineHeight:1.15,overflowWrap:'anywhere',maxHeight:42,overflow:'hidden'}}>{g.name}</div>}
+    <div data-banner-region style={{position:'absolute',left,top:mobile?113:70,width:copyWidth,height:mobile?453:260,display:'flex',flexDirection:'column',alignItems:'center',gap:mobile?16:8,textAlign:'center',overflow:'hidden'}}>
+      <div style={{width:'100%',flexShrink:0}}>
+        <h1 data-banner-text className="gh-display" style={{...textStyle,margin:0,fontSize:fitted(heading,mobile?90:hasOffer?48:58,copyWidth),lineHeight:1.15,letterSpacing:'-.045em',color:'#FF970F',textShadow:`0 2px 0 #8c3100,0 0 20px ${orange}44`}}>{heading}</h1>
+        {second && <div data-banner-text className="gh-display" style={{...textStyle,fontSize:fitted(second,mobile?128:hasOffer?62:78,copyWidth),lineHeight:1.15,letterSpacing:'-.045em',color:'#fff',textShadow:'0 3px 0 #999'}}>{second}</div>}
+      </div>
+      {s.bannerPeriod && <div data-banner-text className="gh-display" style={{...textStyle,flexShrink:0,width:'95%',border:`2px solid ${orange}`,borderRadius:60,padding:mobile?'10px 20px':'5px 15px',fontSize:mobile?29:22,lineHeight:1.1,boxShadow:glow}}>{s.bannerPeriod}</div>}
+      {subtitle && <div data-banner-text className="gh-body" style={{...textStyle,flexShrink:0,fontWeight:700,fontSize:mobile?30:22,lineHeight:1.2,maxHeight:mobile?116:55}}>{subtitle}</div>}
+      {(s.bannerDeal||s.bannerOldPrice||s.bannerPrice) && <div data-banner-text className="gh-display" style={{...textStyle,flexShrink:0,maxHeight:mobile?72:37,fontSize:mobile?26:22,lineHeight:1.2}}>
+        {s.bannerDeal && <span style={{color:'#FF970F',marginRight:12}}>{s.bannerDeal}</span>}
+        {s.bannerOldPrice && <del style={{color:'#aaa',fontSize:mobile?22:18,marginRight:12}}>{s.bannerOldPrice}</del>}
+        {s.bannerPrice && <span>{s.bannerPrice}</span>}
+      </div>}
+    </div>
+    <div data-banner-region style={{position:'absolute',left:mobile?28:650,right:mobile?28:40,top:mobile?580:48,height:mobile?390:310,display:'flex',flexWrap:mobile&&count===5?'wrap':'nowrap',gap:mobile?10:14,justifyContent:'center',alignItems:'center',alignContent:'center',overflow:'hidden'}}>
+      {games.map((g,i)=><div key={i} style={{flex:mobile&&count===5?'0 0 30%':'1 1 0',minWidth:0,maxWidth:count===1?(mobile?420:650):undefined,textAlign:'center'}}>
+        {g.image ? <img src={g.image} alt="" style={{display:'block',width:'100%',height:imgHeight,objectFit:'contain',filter:`drop-shadow(0 0 7px ${orange}AA) drop-shadow(0 12px 15px #000)`}}/> : !s.bannerImage && <div style={{height:imgHeight,border:`1px dashed ${orange}`,borderRadius:8,display:'grid',placeItems:'center',color:orange,fontSize:mobile?12:14}}>MOCKUP {i+1}</div>}
+        {g.name && <div data-banner-text className="gh-body" style={{...textStyle,fontSize:mobile?13:16,fontWeight:700,marginTop:5,lineHeight:1.15,maxHeight:mobile?30:36}}>{g.name}</div>}
       </div>)}
     </div>
-    <div style={{position:'absolute',bottom:0,left:0,right:0,height:63,background:'rgba(11,11,10,.85)',borderTop:`1px solid ${tag.color}`,display:'flex',justifyContent:'center',alignItems:'center'}}><Lockup color="white" h={28}/></div>
-    <div style={{position:'absolute',top:0,left:0,right:0,height:5,background:tag.color}}/>
+    {signature && <div data-banner-text className="gh-display" style={{...textStyle,position:'absolute',left:mobile?38:48,top:mobile?1000:331,width:mobile?524:560,height:mobile?105:33,textAlign:'center',fontSize:mobile?34:19,lineHeight:1.05,color:'#FF970F'}}>{signature}</div>}
+    {cta && <div data-banner-text className="gh-display" style={{...textStyle,position:'absolute',left:mobile?48:106,top:mobile?1141:377,width:mobile?504:444,height:mobile?83:40,border:`2px solid ${orange}`,borderRadius:60,boxShadow:glow,background:'rgba(0,0,0,.8)',display:'flex',alignItems:'center',justifyContent:'center',padding:mobile?'8px 24px':'4px 18px',textAlign:'center',fontSize:mobile?30:19,lineHeight:1.05}}>{cta} →</div>}
   </div>;
 }

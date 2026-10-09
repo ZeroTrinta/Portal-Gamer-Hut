@@ -222,10 +222,8 @@ function App(){
     await document.fonts.ready;
     await new Promise(r=>setTimeout(r,60));
       if(state.template==='bfbanner'){
-        const copy=node.querySelector('[data-banner-copy]');
-        const floor=node.getBoundingClientRect().top+360;
-        const clipped=[...node.querySelectorAll('[data-banner-text]')].some(el=>el.scrollHeight>el.clientHeight+1 || el.scrollWidth>el.clientWidth+1);
-        if(clipped || (copy && copy.getBoundingClientRect().bottom>floor)) throw new Error('Encurte os textos do banner para caber em 1500 × 435.');
+        const clipped=[...node.querySelectorAll('[data-banner-text], [data-banner-region]')].some(el=>el.scrollHeight>el.clientHeight+2 || el.scrollWidth>el.clientWidth+2);
+        if(clipped) throw new Error('Encurte os textos do banner para caber no formato escolhido.');
       }
       return await htmlToImage.toPng(node, {
         width:node.offsetWidth, height:node.offsetHeight, pixelRatio:1,
@@ -243,7 +241,7 @@ function App(){
     try{
       const url = await captureToDataUrl(s, pageIdx);
       const tagName = tag.label.toLowerCase().replace(/[^a-z]/g,'');
-      const suffix = isCarousel ? `-p${s.current+1}` : '';
+      const suffix = isCarousel ? `-p${s.current+1}` : s.template==='bfbanner' ? `-${s.bannerFormat||'desktop'}` : '';
       triggerDownload(url, `gamerhut-${s.template}-${tagName}${suffix}.png`);
       flashToast('PNG exportado · '+dims.w+'×'+dims.h);
     }catch(e){ flashToast(e.message||'Falha ao exportar'); console.error(e); }
