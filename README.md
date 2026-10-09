@@ -19,13 +19,13 @@ Depois abra `http://localhost:8080`.
 
 ## Modelos disponíveis
 
-- **Modelo Black Friday** — carrossel de 1–8 ofertas em 1080×1350. Cada página
+- **Modelo Black Friday** — carrossel sem limite fixo de ofertas (mínimo 1) em 1080×1350. Cada página
   tem arte do jogo ao fundo (com zoom e posição), nome, preço anterior riscado,
   preço promocional em destaque e condição opcional. A cor segue a categoria.
   Selecione o modelo no Studio, preencha os preços e use **Exportar PNG** ou
   **Todas**. Os preços não são consultados automaticamente.
 
-- **Carrossel** — 3–5 páginas sequenciais (capa + conteúdo). Inclui o tipo de
+- **Carrossel** — páginas sequenciais sem limite fixo (mínimo 3) (capa + conteúdo). Inclui o tipo de
   página **Vídeo**: card horizontal 16:9 com trailer tocando e **exportação em
   vídeo** (canvas + MediaRecorder, com áudio).
 - **Post blocado** — tipografia forte sobre cor sólida.
@@ -66,3 +66,20 @@ assets/           # logotipos e marcas (PNG)
   o trailer tocando; sai em MP4 ou WebM conforme o navegador.
 
 > Observação: vídeos enviados ficam só na sessão (não são salvos ao recarregar).
+
+## Banner Black Friday desktop
+
+Escolha **BANNER BLACK FRIDAY** no Studio. O PNG tem exatamente **1500 × 435 pixels**.
+Use **Jogo em destaque** com uma arte de fundo e mockup opcional, ou **Vários jogos**
+com 1 a 5 capas/mockups. PNG transparente funciona para recortes; as imagens mantêm
+sua proporção. Chamada, nome, destaque de desconto, preços e CTA são editáveis.
+Deixe preços e desconto em branco para uma campanha sem valores. Não são calculados
+nem inventados descontos. O exportador avisa se os textos excedem o espaço do banner.
+
+Nos carrosséis, digite a quantidade e confirme com Enter ou saindo do campo.
+**Ir para página** acessa diretamente qualquer oferta. Reduzir a quantidade não apaga
+o conteúdo das páginas ocultas. A navegação mostra até sete botões por vez, e páginas
+vazias não ocupam espaço de armazenamento. A capacidade de imagens salvas depende do
+armazenamento do navegador; exportações em lote dependem da permissão de downloads múltiplos.
+
+Testes de lógica e renderização estrutural: `npm install` e `npm test`.

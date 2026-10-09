@@ -87,9 +87,9 @@ function ImageOrSlot({ src, label='ARRASTE A IMAGEM DO JOGO', style={}, blur=0, 
           position:'absolute', top:0, left:0,
           width:'100%', height:'100%',
           objectFit:'cover',
-          objectPosition:`${x||50}% ${y||50}%`,
+          objectPosition:`${x??50}% ${y??50}%`,
           transform:`scale(${finalScale.toFixed(3)})`,
-          transformOrigin:`${x||50}% ${y||50}%`,
+          transformOrigin:`${x??50}% ${y??50}%`,
           filter:blurFilter,
           display:'block',
         }}/>
@@ -667,6 +667,7 @@ function PostStage({ s, pageIndex=0, stageRef, exporting=false }){
   let body;
   if(s.template==='block')    body = <BlockBody s={s} tag={tag}/>;
   else if(s.template==='image') body = <ImageBody s={s} tag={tag}/>;
+  else if(s.template==='bfbanner') body = <BlackFridayBanner s={s} tag={tag}/>;
   else if(s.template==='blackfriday') body = <BlackFridayBody s={s} tag={tag} pageIndex={pageIndex}/>;
   else if(s.template==='carousel') body = <CarouselBody s={s} tag={tag} pageIndex={pageIndex} exporting={exporting}/>;
   else if(s.template==='quiz') body = <QuizBody s={s} tag={tag}/>;
@@ -827,5 +828,37 @@ function BlackFridayBody({ s, tag, pageIndex }){
       </div>
     </div>
     <LogoFooter onImage/>
+  </div>;
+}
+
+/* Fixed desktop artboard. Separate fields preserve carousel offers. */
+function BlackFridayBanner({s,tag}){
+  const multi=s.bannerMode==='games';
+  const count=multi?Math.max(1,Math.min(5,s.bannerCount||5)):1;
+  const games=Array.from({length:count},(_,i)=>(s.bannerGames||[])[i]||{});
+  const heading=s.bannerTitle??'BLACK FRIDAY';
+  const subtitle=s.bannerSubtitle??'SEU PRÓXIMO JOGO ESTÁ AQUI';
+  return <div style={{position:'absolute',inset:0,background:'#0B0B0A',color:GH.white,overflow:'hidden'}}>
+    {s.bannerImage && <div style={{position:'absolute',inset:0}}><ImageOrSlot src={s.bannerImage} zoom={s.bannerZoom} x={s.bannerX} y={s.bannerY}/></div>}
+    <div style={{position:'absolute',inset:0,background:'linear-gradient(90deg,#0B0B0A 0%,rgba(11,11,10,.96) 27%,rgba(11,11,10,.28) 72%,rgba(11,11,10,.5))'}}/>
+    <div style={{position:'absolute',right:-80,top:-150,width:750,height:750,border:`2px solid ${tag.color}`,transform:'rotate(-18deg)',opacity:.35}}/>
+    <div data-banner-copy style={{position:'absolute',left:48,top:30,width:multi?485:610}}>
+      <div className="gh-mono" style={{fontSize:12,letterSpacing:4,color:tag.color,marginBottom:12}}>GAMER HUT / OFERTAS ESPECIAIS</div>
+      <h1 data-banner-text className="gh-display" style={{fontSize:heading.length>25?42:multi?64:74,lineHeight:.95,margin:0,color:tag.color,overflowWrap:'anywhere',maxHeight:145,overflow:'hidden'}}>{heading}</h1>
+      <div data-banner-text className="gh-display" style={{fontSize:subtitle.length>55?20:26,lineHeight:1.12,marginTop:13,maxHeight:60,overflow:'hidden',overflowWrap:'anywhere'}}>{subtitle}</div>
+      <div style={{display:'flex',gap:14,alignItems:'center',marginTop:14,flexWrap:'wrap'}}>
+        {s.bannerDeal && <span className="gh-display" style={{background:tag.color,color:readableOn(tag.color),fontSize:23,padding:'6px 12px',maxWidth:'100%',overflowWrap:'anywhere'}}>{s.bannerDeal}</span>}
+        {(s.bannerOldPrice||s.bannerPrice) && <span className="gh-body" style={{fontSize:20}}>{s.bannerOldPrice && <del style={{color:'#bbb',marginRight:10}}>{s.bannerOldPrice}</del>}<strong style={{fontSize:30}}>{s.bannerPrice}</strong></span>}
+      </div>
+      {(s.bannerCta??'APROVEITE AS OFERTAS') && <div className="gh-mono" style={{fontSize:13,fontWeight:700,marginTop:16,letterSpacing:1}}>{s.bannerCta??'APROVEITE AS OFERTAS'} →</div>}
+    </div>
+    <div style={{position:'absolute',left:multi?570:790,right:48,top:32,height:310,display:'flex',gap:14,justifyContent:'center',alignItems:'center'}}>
+      {games.map((g,i)=><div key={i} style={{flex:1,minWidth:0,maxWidth:multi?340:550,textAlign:'center'}}>
+        {g.image ? <img src={g.image} alt="" style={{width:'100%',height:multi?258:300,objectFit:'contain',filter:'drop-shadow(0 12px 14px rgba(0,0,0,.65))'}}/> : !s.bannerImage && <div style={{height:multi?258:300,border:`1px dashed ${tag.color}`,display:'grid',placeItems:'center',color:tag.color,fontSize:14}}>MOCKUP {i+1}</div>}
+        {g.name && <div data-banner-text className="gh-body" style={{fontSize:count>3?14:18,fontWeight:700,marginTop:8,lineHeight:1.15,overflowWrap:'anywhere',maxHeight:42,overflow:'hidden'}}>{g.name}</div>}
+      </div>)}
+    </div>
+    <div style={{position:'absolute',bottom:0,left:0,right:0,height:63,background:'rgba(11,11,10,.85)',borderTop:`1px solid ${tag.color}`,display:'flex',justifyContent:'center',alignItems:'center'}}><Lockup color="white" h={28}/></div>
+    <div style={{position:'absolute',top:0,left:0,right:0,height:5,background:tag.color}}/>
   </div>;
 }

@@ -3,6 +3,7 @@
    ============================================================ */
 
 function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
+  const isBanner = s.template==='bfbanner';
   const isBlackFriday = s.template==='blackfriday';
   const isCarousel = s.template==='carousel'||isBlackFriday;
   const isImage    = s.template==='image';
@@ -15,7 +16,7 @@ function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
   const accent = s.fill ? readableOn(tag.color) : tag.color;
 
   const setPage = (patch)=> setS(p=>{
-    const pages = p.pages.slice(); pages[pageIdx-1] = { ...pages[pageIdx-1], ...patch };
+    const pages = { ...p.pages }; pages[pageIdx-1] = { ...pages[pageIdx-1], ...patch };
     return { ...p, pages };
   });
   const curPage = isCarousel ? (s.pages[pageIdx-1]||{}) : null;
@@ -42,15 +43,11 @@ function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
       {/* CAROUSEL page manager */}
       {isCarousel &&
         <CtrlSection title="PÁGINAS" right={
-          <Stepper label="" value={s.pageCount} min={isBlackFriday?1:3} max={8}
-            onChange={n=>setS(p=>{
-              const pages = p.pages.slice();
-              while(pages.length < n-1) pages.push({ title:'', body:'', image:null });
-              return { ...p, pageCount:n, current:Math.min(p.current,n-1), pages };
-            })}/>
+          <PageNumber value={s.pageCount} min={isBlackFriday?1:3} label="Quantidade de páginas"
+            onChange={n=>setS(p=>({...p,pageCount:n,current:Math.min(p.current,n-1)}))}/>
         }>
           <div style={{ display:'flex', gap:7, flexWrap:'wrap' }}>
-            {Array.from({length:s.pageCount}).map((_,i)=>(
+            {pageWindow(s.current,s.pageCount).map(i=>(
               <button key={i} onClick={()=>setS(p=>({...p,current:i}))} className="gh-mono" style={{
                 cursor:'pointer', flex:'1 0 28%', padding:'9px 0', borderRadius:7, fontSize:11, fontWeight:700,
                 background:i===s.current?GH.orange:GH.bg, color:i===s.current?GH.ink:GH.white,
@@ -59,12 +56,14 @@ function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
               </button>
             ))}
           </div>
+          <div style={{marginTop:14}}><PageNumber label="Ir para página" value={s.current+1} min={1} max={s.pageCount}
+            onChange={n=>setS(p=>({...p,current:n-1}))}/></div>
         </CtrlSection>}
 
       {/* CONTENT */}
       <CtrlSection title={isCarousel ? (onCover?'CONTEÚDO · CAPA':'CONTEÚDO · PÁGINA '+(pageIdx+1)) : 'CONTEÚDO'}>
         {/* carousel content page */}
-        {isBlackFriday ? <BlackFridayFields offer={onCover?s:curPage} setOffer={onCover?set:setPage}/> : isCarousel && !onCover ? <>
+        {isBanner ? <BannerFields s={s} set={set}/> : isBlackFriday ? <BlackFridayFields offer={onCover?s:curPage} setOffer={onCover?set:setPage}/> : isCarousel && !onCover ? <>
           <div style={{ marginBottom:18 }}>
             <Segmented value={curPage.type==='video'?'video':'standard'} onChange={v=>{
               if(v==='video') setPage({ type:'video',
@@ -189,7 +188,7 @@ function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
       </CtrlSection>
 
       {/* STYLE */}
-      {onCover && !isImage && !isBlackFriday &&
+      {onCover && !isImage && !isBlackFriday && !isBanner &&
         <CtrlSection title="ESTILO DE FUNDO" right={
           <span className="gh-mono" style={{ color:GH.mut, fontSize:9, letterSpacing:'.1em' }}>{PATTERNS.length} PADRÕES</span>}>
           {(isReels||isCarousel||isQuiz||isRanking||isThumb) && s.image
@@ -231,7 +230,7 @@ function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
         </CtrlSection>}
 
       {/* INK — text + logo color */}
-      {!isBlackFriday && ((onCover && !isBlock) || isImage) &&
+      {!isBanner && !isBlackFriday && ((onCover && !isBlock) || isImage) &&
         <CtrlSection title="COR DO TEXTO / LOGO">
           <Segmented value={s.ink||'auto'} onChange={v=>set({ink:v})} options={[
             {id:'auto', label:'AUTO'}, {id:'white', label:'BRANCO'}, {id:'black', label:'PRETO'} ]}/>
@@ -241,7 +240,7 @@ function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
         </CtrlSection>}
 
       {/* TYPE */}
-      {(onCover || isBlackFriday) &&
+      {!isBanner && (onCover || isBlackFriday) &&
         <CtrlSection title="TIPOGRAFIA" right={
           <span className="gh-pixel" style={{ color:GH.orange, fontSize:11 }}>{s.titleSize}px</span>}>
           <input type="range" min={64} max={172} value={s.titleSize}
@@ -532,5 +531,37 @@ function BlackFridayFields({ offer, setOffer }){
         imgX={offer.imageX} onImgX={v=>setOffer({imageX:v})}
         imgY={offer.imageY} onImgY={v=>setOffer({imageY:v})}/>
     </Field>
+  </>;
+}
+
+function PageNumber({value,min=1,max,label,onChange}){
+  const [draft,setDraft]=React.useState(String(value));
+  React.useEffect(()=>setDraft(String(value)),[value]);
+  const commit=()=>{const n=validPageCount(draft,min); if(n!==null && (max==null||n<=max)) onChange(n); else setDraft(String(value));};
+  return <label className="gh-mono" style={{display:'flex',gap:10,alignItems:'center',color:GH.mut,fontSize:11}}>
+    {label}<input aria-label={label} type="number" min={min} max={max} step="1" value={draft}
+      onChange={e=>setDraft(e.target.value)} onBlur={commit} onKeyDown={e=>{if(e.key==='Enter') e.currentTarget.blur();}}
+      style={{...inputBase,width:100}}/></label>;
+}
+function BannerFields({s,set}){
+  const games=s.bannerGames||[];
+  const update=(i,patch)=>{const next=games.slice();next[i]={...next[i],...patch};set({bannerGames:next});};
+  return <>
+    <Field label="Composição"><Segmented value={s.bannerMode||'hero'} onChange={v=>set({bannerMode:v})}
+      options={[{id:'hero',label:'JOGO EM DESTAQUE'},{id:'games',label:'VÁRIOS JOGOS'}]}/></Field>
+    <Field label="Chamada"><TextInput value={s.bannerTitle??'BLACK FRIDAY'} onChange={e=>set({bannerTitle:e.target.value})}/></Field>
+    <Field label="Nome do jogo / mensagem"><TextInput value={s.bannerSubtitle??'SEU PRÓXIMO JOGO ESTÁ AQUI'} onChange={e=>set({bannerSubtitle:e.target.value})}/></Field>
+    <Field label="Destaque opcional (ex.: ATÉ 50% OFF)"><TextInput value={s.bannerDeal||''} onChange={e=>set({bannerDeal:e.target.value})}/></Field>
+    <Field label="Preço anterior (opcional)"><TextInput value={s.bannerOldPrice||''} onChange={e=>set({bannerOldPrice:e.target.value})}/></Field>
+    <Field label="Preço promocional (opcional)"><TextInput value={s.bannerPrice||''} onChange={e=>set({bannerPrice:e.target.value})}/></Field>
+    <Field label="Botão / chamada final"><TextInput value={s.bannerCta??'APROVEITE AS OFERTAS'} onChange={e=>set({bannerCta:e.target.value})}/></Field>
+    <Field label="Arte ou banner de fundo"><ImageDrop value={s.bannerImage} onChange={v=>set({bannerImage:v})}
+      zoom={s.bannerZoom} onZoom={v=>set({bannerZoom:v})} imgX={s.bannerX} onImgX={v=>set({bannerX:v})}
+      imgY={s.bannerY} onImgY={v=>set({bannerY:v})}/></Field>
+    {(s.bannerMode||'hero')==='games' && <Field label="Quantidade de jogos"><Stepper value={s.bannerCount||5} min={1} max={5} onChange={v=>set({bannerCount:v})}/></Field>}
+    {Array.from({length:s.bannerMode==='games'?(s.bannerCount||5):1},(_,i)=><div key={i} style={{borderTop:`1px solid ${GH.lineSoft}`,paddingTop:16}}>
+      <Field label={'Mockup / capa '+(i+1)}><ImageDrop value={games[i]?.image} onChange={v=>update(i,{image:v})}/></Field>
+      <Field label="Nome (opcional)"><TextInput value={games[i]?.name||''} onChange={e=>update(i,{name:e.target.value})}/></Field>
+    </div>)}
   </>;
 }
