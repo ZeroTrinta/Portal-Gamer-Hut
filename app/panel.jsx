@@ -253,7 +253,7 @@ function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
       <CtrlSection title="REGRAS DA MARCA">
         <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
           <div className="gh-mono" style={{ display:'flex', alignItems:'center', gap:10, color:GH.mut, fontSize:11 }}>
-            <span style={{ color:'#2E9D5B', fontSize:14 }}>✓</span> Logo aplicado automaticamente (inferior central)
+            <span style={{ color:'#2E9D5B', fontSize:14 }}>✓</span> Logo aplicado automaticamente ({isBanner?'topo central':'inferior central'})
           </div>
           {isReels && <Toggle label="Mostrar guia de Safe Zone (4:5)" checked={s.showSafe}
             onChange={v=>set({showSafe:v})}/>}
@@ -547,14 +547,23 @@ function BannerFields({s,set}){
   const games=s.bannerGames||[];
   const update=(i,patch)=>{const next=games.slice();next[i]={...next[i],...patch};set({bannerGames:next});};
   return <>
+    <Field label="Formato do banner"><Segmented value={s.bannerFormat||'desktop'} onChange={v=>set({bannerFormat:v})}
+      options={[{id:'desktop',label:'DESKTOP · 1500 × 435'},{id:'mobile',label:'MOBILE · 600 × 1269'}]}/></Field>
+    <Field label="Aplicar textos da campanha"><div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+      {Object.entries({preblack:'PRÉ-BLACK',black:'BLACK FÍSICO',month:'MÊS DA MÍDIA FÍSICA'}).map(([id,label])=><button key={id} onClick={()=>set({...BANNER_CAMPAIGNS[id],tagId:'blackfriday',bannerDeal:'',bannerOldPrice:'',bannerPrice:''})} style={{padding:8,border:`1px solid ${GH.orange}`,borderRadius:6,background:GH.bg,color:GH.white,cursor:'pointer',fontSize:11}}>{label}</button>)}
+    </div></Field>
+    <p className="gh-mono" style={{fontSize:10,color:GH.mut,lineHeight:1.5}}>Os botões substituem os textos e limpam preços/desconto. As imagens são mantidas. Revise o período antes de exportar.</p>
     <Field label="Composição"><Segmented value={s.bannerMode||'hero'} onChange={v=>set({bannerMode:v})}
       options={[{id:'hero',label:'JOGO EM DESTAQUE'},{id:'games',label:'VÁRIOS JOGOS'}]}/></Field>
-    <Field label="Chamada"><TextInput value={s.bannerTitle??'BLACK FRIDAY'} onChange={e=>set({bannerTitle:e.target.value})}/></Field>
-    <Field label="Nome do jogo / mensagem"><TextInput value={s.bannerSubtitle??'SEU PRÓXIMO JOGO ESTÁ AQUI'} onChange={e=>set({bannerSubtitle:e.target.value})}/></Field>
+    <Field label="Chamada"><TextInput value={s.bannerTitle??'BLACK'} onChange={e=>set({bannerTitle:e.target.value})}/></Field>
+    <Field label="Segunda linha do título"><TextInput value={s.bannerSecondLine??'FÍSICO'} onChange={e=>set({bannerSecondLine:e.target.value})}/></Field>
+    <Field label="Período (opcional)"><TextInput value={s.bannerPeriod||''} placeholder="DE 10 A 12 DE OUTUBRO" onChange={e=>set({bannerPeriod:e.target.value})}/></Field>
+    <Field label="Assinatura da campanha"><TextInput value={s.bannerSignature??'Em novembro, o jogo é seu'} onChange={e=>set({bannerSignature:e.target.value})}/></Field>
+    <Field label="Nome do jogo / mensagem"><TextInput value={s.bannerSubtitle??'Ofertas exclusivas para completar sua coleção'} onChange={e=>set({bannerSubtitle:e.target.value})}/></Field>
     <Field label="Destaque opcional (ex.: ATÉ 50% OFF)"><TextInput value={s.bannerDeal||''} onChange={e=>set({bannerDeal:e.target.value})}/></Field>
     <Field label="Preço anterior (opcional)"><TextInput value={s.bannerOldPrice||''} onChange={e=>set({bannerOldPrice:e.target.value})}/></Field>
     <Field label="Preço promocional (opcional)"><TextInput value={s.bannerPrice||''} onChange={e=>set({bannerPrice:e.target.value})}/></Field>
-    <Field label="Botão / chamada final"><TextInput value={s.bannerCta??'APROVEITE AS OFERTAS'} onChange={e=>set({bannerCta:e.target.value})}/></Field>
+    <Field label="Botão / chamada final"><TextInput value={s.bannerCta??'CONFIRA AS OFERTAS'} onChange={e=>set({bannerCta:e.target.value})}/></Field>
     <Field label="Arte ou banner de fundo"><ImageDrop value={s.bannerImage} onChange={v=>set({bannerImage:v})}
       zoom={s.bannerZoom} onZoom={v=>set({bannerZoom:v})} imgX={s.bannerX} onImgX={v=>set({bannerX:v})}
       imgY={s.bannerY} onImgY={v=>set({bannerY:v})}/></Field>

@@ -67,9 +67,9 @@ assets/           # logotipos e marcas (PNG)
 
 > Observação: vídeos enviados ficam só na sessão (não são salvos ao recarregar).
 
-## Banner Black Friday desktop
+## Banners Black Físico — desktop e mobile
 
-Escolha **BANNER BLACK FRIDAY** no Studio. O PNG tem exatamente **1500 × 435 pixels**.
+Escolha **BANNER BLACK FRIDAY** no Studio. Escolha **Desktop (1500 × 435)** ou **Mobile (600 × 1269)**. O PNG é exportado na dimensão nativa do formato escolhido, com o formato no nome do arquivo.
 Use **Jogo em destaque** com uma arte de fundo e mockup opcional, ou **Vários jogos**
 com 1 a 5 capas/mockups. PNG transparente funciona para recortes; as imagens mantêm
 sua proporção. Chamada, nome, destaque de desconto, preços e CTA são editáveis.
@@ -83,3 +83,11 @@ vazias não ocupam espaço de armazenamento. A capacidade de imagens salvas depe
 armazenamento do navegador; exportações em lote dependem da permissão de downloads múltiplos.
 
 Testes de lógica e renderização estrutural: `npm install` e `npm test`.
+
+Os banners seguem a campanha Black Físico: fundo escuro, iluminação laranja, logo
+no topo, título em duas linhas, período em contorno luminoso e CTA em botão.
+O mobile reorganiza a composição na vertical; cinco jogos usam duas fileiras.
+**Pré-Black**, **Black Físico** e **Mês da Mídia Física** aplicam textos editáveis.
+O primeiro usa o período de 10 a 12 de outubro das referências; revise as datas para
+cada campanha. Aplicar um conjunto substitui textos e limpa preços/desconto,
+preservando imagens e formato. Trocar apenas o formato preserva todos os campos.

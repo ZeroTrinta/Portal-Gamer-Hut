@@ -39,3 +39,17 @@ test('carousel renders offer above the former eight-page cap',()=>{
  const tree=run("BlackFridayBody({s:{pageCount:100,pages:{98:{title:'OFERTA 100',oldPrice:'R$ 200',salePrice:'R$ 100'}}},tag:TAGS[0],pageIndex:99})");
  assert.ok(JSON.stringify(tree).includes('OFERTA 100'));assert.equal(nodes(tree,n=>n.type==='del')[0].children[0],'R$ 200');
 });
+test('mobile banner uses native 600 x 1269 and does not change other templates',()=>{
+ const d=run("stageDims({template:'bfbanner',bannerFormat:'mobile'})");assert.equal(d.w,600);assert.equal(d.h,1269);
+ const stage=run("PostStage({s:{template:'bfbanner',bannerFormat:'mobile'}})");assert.equal(stage.props.style.width,600);assert.equal(stage.props.style.height,1269);
+ assert.equal(run("stageDims({template:'blackfriday',bannerFormat:'mobile'}).w"),1080);
+});
+test('campaign presets contain editable signature and reference dates only for preblack',()=>{
+ assert.equal(run('BANNER_CAMPAIGNS.preblack.bannerPeriod'),'DE 10 A 12 DE OUTUBRO');
+ assert.equal(run('BANNER_CAMPAIGNS.black.bannerPeriod'),'');
+ assert.equal(run('BANNER_CAMPAIGNS.month.bannerSignature'),'Em novembro, o jogo é seu');
+ for(const preset of ['preblack','black','month']){
+  const tree=run(`BlackFridayBanner({s:{...BANNER_CAMPAIGNS.${preset},bannerFormat:'mobile'},tag:TAGS[0]})`);
+  assert.ok(JSON.stringify(tree).includes(run(`BANNER_CAMPAIGNS.${preset}.bannerSubtitle`)));
+ }
+});

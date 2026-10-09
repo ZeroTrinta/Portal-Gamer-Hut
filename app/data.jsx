@@ -34,7 +34,7 @@ const TAGS = [
 /* The generation templates */
 const TEMPLATES = [
   { id:'carousel', label:'CARROSSEL',      ratio:'4:5', w:1080, h:1350, note:'Quantidade livre de páginas' },
-  { id:'bfbanner', label:'BANNER BLACK FRIDAY', ratio:'100:29', w:1500, h:435, note:'Desktop · 1500 × 435 · até 5 jogos' },
+  { id:'bfbanner', label:'BANNER BLACK FRIDAY', ratio:'100:29', w:1500, h:435, note:'Desktop + Mobile · até 5 jogos' },
   { id:'blackfriday', label:'MODELO BLACK FRIDAY', ratio:'4:5', w:1080, h:1350, note:'Carrossel de ofertas · de / por' },
   { id:'block',    label:'POST BLOCADO',   ratio:'4:5', w:1080, h:1350, note:'Tipografia forte, cor sólida' },
   { id:'image',    label:'POST C/ IMAGEM', ratio:'4:5', w:1080, h:1350, note:'Texto + imagem em destaque' },
@@ -176,3 +176,9 @@ function pageWindow(current,total){
   const start=Math.max(0,Math.min(current-3,total-7));
   return Array.from({length:Math.min(total,7)},(_,i)=>start+i);
 }
+
+const BANNER_CAMPAIGNS = {
+  preblack:{bannerTitle:'PRÉ-BLACK',bannerSecondLine:'FÍSICO',bannerPeriod:'DE 10 A 12 DE OUTUBRO',bannerSubtitle:'Ofertas exclusivas para completar sua coleção',bannerSignature:'Um aquecimento para as ofertas de Novembro',bannerCta:'CONFIRA AS OFERTAS'},
+  black:{bannerTitle:'BLACK',bannerSecondLine:'FÍSICO',bannerPeriod:'',bannerSubtitle:'Ofertas exclusivas para completar sua coleção',bannerSignature:'Em novembro, o jogo é seu',bannerCta:'CONFIRA AS OFERTAS'},
+  month:{bannerTitle:'MÊS DA',bannerSecondLine:'MÍDIA FÍSICA',bannerPeriod:'NOVEMBRO',bannerSubtitle:'Seu próximo jogo merece um lugar na coleção',bannerSignature:'Em novembro, o jogo é seu',bannerCta:'EXPLORE A SELEÇÃO'},
+};
