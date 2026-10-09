@@ -47,6 +47,7 @@ const DEFAULT_STATE = {
 };
 
 const PRESETS = {
+  bfbanner: { template:'bfbanner', tagId:'blackfriday', fill:false, ink:'white' },
   blackfriday: { template:'blackfriday', tagId:'blackfriday', fill:false, ink:'white', titleSize:92 },
   block:    { template:'block', tagId:'pre-venda', pattern:'solid', fill:true, eyebrow:'CHEGOU NA LOJA',
               title:'MÍDIA FÍSICA NEVER DIES', subtitle:'Drop toda sexta · estoque limitado', titleSize:120 },
@@ -74,10 +75,12 @@ function loadState(){
     const state = { ...DEFAULT_STATE, ...raw };
     if(!TEMPLATES.some(t=>t.id===state.template)) state.template='carousel';
     const minPages = state.template==='blackfriday'?1:3;
-    state.pageCount=Math.max(minPages,Math.min(8,Math.trunc(Number(state.pageCount))||4));
+    state.pageCount=validPageCount(state.pageCount, minPages) || 4;
     state.current=Math.max(0,Math.min(state.pageCount-1,Math.trunc(Number(state.current))||0));
-    state.pages=Array.isArray(raw.pages)?raw.pages.map(p=>p&&typeof p==='object'?p:{}):DEFAULT_STATE.pages;
-    while(state.pages.length<state.pageCount-1) state.pages.push({title:'',body:'',image:null});
+    state.pages=raw.pages && typeof raw.pages==='object' ? Object.fromEntries(Object.entries(raw.pages).filter(([k,v])=>/^\d+$/.test(k) && v && typeof v==='object')) : DEFAULT_STATE.pages;
+    // Pages are created on edit, so large carousels do not allocate empty objects.
+    state.bannerGames=Array.isArray(raw.bannerGames)?raw.bannerGames.slice(0,5).map(g=>g&&typeof g==='object'?g:{}):[];
+    state.bannerCount=Math.max(1,Math.min(5,Math.trunc(Number(raw.bannerCount))||5));
     return state;
   }catch(e){ return DEFAULT_STATE; }
 }
@@ -96,7 +99,7 @@ function App(){
 
   const set = useCallback((patch)=> setS(p=>({ ...p, ...patch })), []);
   useEffect(()=>{ try{
-    const safe = { ...s, pages: (s.pages||[]).map(p=>{ const { video, ...rest } = p; return rest; }) };
+    const safe = { ...s, pages: Object.fromEntries(Object.entries(s.pages||{}).map(([k,p])=>{ const { video, ...rest } = p||{}; return [k,rest]; })) };
     localStorage.setItem('gh-studio', JSON.stringify(safe));
   }catch(e){} }, [s]);
 
@@ -110,15 +113,16 @@ function App(){
   const isVideoPage = s.template==='carousel' && !!(curPageObj && curPageObj.type==='video');
 
   // which image is "active" in the current view (for drag-to-pan)
-  const activeImg = isCarousel && s.current>0 ? curPageObj?.image : s.image;
-  const activeImgX = isCarousel && s.current>0 ? (curPageObj?.imageX??50) : (s.imageX??50);
-  const activeImgY = isCarousel && s.current>0 ? (curPageObj?.imageY??50) : (s.imageY??50);
-  const activeZoom = isCarousel && s.current>0 ? (curPageObj?.imageZoom??100) : (s.imageZoom??100);
+  const activeImg = s.template==='bfbanner' ? s.bannerImage : isCarousel && s.current>0 ? curPageObj?.image : s.image;
+  const activeImgX = s.template==='bfbanner' ? (s.bannerX??50) : isCarousel && s.current>0 ? (curPageObj?.imageX??50) : (s.imageX??50);
+  const activeImgY = s.template==='bfbanner' ? (s.bannerY??50) : isCarousel && s.current>0 ? (curPageObj?.imageY??50) : (s.imageY??50);
+  const activeZoom = s.template==='bfbanner' ? (s.bannerZoom??100) : isCarousel && s.current>0 ? (curPageObj?.imageZoom??100) : (s.imageZoom??100);
 
   const setActiveImgPos = useCallback((x, y) => {
-    if (isCarousel && s.current > 0) {
+    if(s.template==='bfbanner') { set({bannerX:x,bannerY:y}); }
+    else if (isCarousel && s.current > 0) {
       setS(p => {
-        const pages = p.pages.slice();
+        const pages = { ...p.pages };
         const idx = p.current - 1;
         if (idx >= 0) pages[idx] = { ...pages[idx], imageX: x, imageY: y };
         return { ...p, pages };
@@ -126,7 +130,7 @@ function App(){
     } else {
       set({ imageX: x, imageY: y });
     }
-  }, [isCarousel, s.current, set, setS]);
+  }, [isCarousel, s.current, s.template, set, setS]);
 
   // drag-to-pan handlers
   const onPreviewMouseDown = useCallback((e) => {
@@ -217,6 +221,12 @@ function App(){
         })));
     await document.fonts.ready;
     await new Promise(r=>setTimeout(r,60));
+      if(state.template==='bfbanner'){
+        const copy=node.querySelector('[data-banner-copy]');
+        const floor=node.getBoundingClientRect().top+360;
+        const clipped=[...node.querySelectorAll('[data-banner-text]')].some(el=>el.scrollHeight>el.clientHeight+1 || el.scrollWidth>el.clientWidth+1);
+        if(clipped || (copy && copy.getBoundingClientRect().bottom>floor)) throw new Error('Encurte os textos do banner para caber em 1500 × 435.');
+      }
       return await htmlToImage.toPng(node, {
         width:node.offsetWidth, height:node.offsetHeight, pixelRatio:1,
         backgroundColor:'#0B0B0A', fontEmbedCSS,   // NOTE: no cacheBust — it breaks logo PNG fetch
@@ -236,7 +246,7 @@ function App(){
       const suffix = isCarousel ? `-p${s.current+1}` : '';
       triggerDownload(url, `gamerhut-${s.template}-${tagName}${suffix}.png`);
       flashToast('PNG exportado · '+dims.w+'×'+dims.h);
-    }catch(e){ flashToast('Falha ao exportar'); console.error(e); }
+    }catch(e){ flashToast(e.message||'Falha ao exportar'); console.error(e); }
     setBusy(false);
   }
   async function exportAll(){
@@ -249,7 +259,7 @@ function App(){
         await new Promise(r=>setTimeout(r,180));
       }
       flashToast(s.pageCount+' páginas exportadas');
-    }catch(e){ flashToast('Falha ao exportar'); console.error(e); }
+    }catch(e){ flashToast(e.message||'Falha ao exportar'); console.error(e); }
     setBusy(false);
   }
 
@@ -489,7 +499,7 @@ function PreviewBar({ s, dims, setS, isCarousel }){
       {isCarousel && <>
         <NavArr dir="‹" dis={s.current<=0} onClick={()=>setS(p=>({...p,current:Math.max(0,p.current-1)}))}/>
         <div style={{ display:'flex', gap:7 }}>
-          {Array.from({length:s.pageCount}).map((_,i)=>(
+          {pageWindow(s.current,s.pageCount).map(i=>(
             <button key={i} onClick={()=>setS(p=>({...p,current:i}))} title={i===0?'Capa':'Página '+(i+1)}
               style={{ width:i===s.current?26:10, height:10, borderRadius:99, cursor:'pointer', border:'none',
                 background:i===s.current?GH.orange:'#3a3531', transition:'all .15s' }}/>

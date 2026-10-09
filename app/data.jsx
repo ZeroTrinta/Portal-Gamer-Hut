@@ -33,7 +33,8 @@ const TAGS = [
 
 /* The generation templates */
 const TEMPLATES = [
-  { id:'carousel', label:'CARROSSEL',      ratio:'4:5', w:1080, h:1350, note:'3–5 páginas sequenciais' },
+  { id:'carousel', label:'CARROSSEL',      ratio:'4:5', w:1080, h:1350, note:'Quantidade livre de páginas' },
+  { id:'bfbanner', label:'BANNER BLACK FRIDAY', ratio:'100:29', w:1500, h:435, note:'Desktop · 1500 × 435 · até 5 jogos' },
   { id:'blackfriday', label:'MODELO BLACK FRIDAY', ratio:'4:5', w:1080, h:1350, note:'Carrossel de ofertas · de / por' },
   { id:'block',    label:'POST BLOCADO',   ratio:'4:5', w:1080, h:1350, note:'Tipografia forte, cor sólida' },
   { id:'image',    label:'POST C/ IMAGEM', ratio:'4:5', w:1080, h:1350, note:'Texto + imagem em destaque' },
@@ -165,3 +166,13 @@ function resolveInk(mode, autoTextHex){
 }
 
 Object.assign(window, { GH, TAGS, TEMPLATES, PATTERNS, PATTERN_LABELS, patternStyle, hexA, readableOn, resolveInk });
+
+// No editorial cap; only accept positive integers representable by JavaScript.
+function validPageCount(value, min=1){
+  const n=Number(value);
+  return Number.isSafeInteger(n) && n>=min ? n : null;
+}
+function pageWindow(current,total){
+  const start=Math.max(0,Math.min(current-3,total-7));
+  return Array.from({length:Math.min(total,7)},(_,i)=>start+i);
+}
