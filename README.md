@@ -19,7 +19,7 @@ Depois abra `http://localhost:8080`.
 
 ## Modelos disponíveis
 
-- **Modelo Black Friday** — carrossel sem limite fixo de ofertas (mínimo 1) em 1080×1350. Cada página
+- **Mês da Mídia Física** — carrossel sem limite fixo de ofertas (mínimo 1) em 1080×1350. Cada página
   tem arte do jogo ao fundo (com zoom e posição), nome, preço anterior riscado,
   preço promocional em destaque e condição opcional. A cor segue a categoria.
   Selecione o modelo no Studio, preencha os preços e use **Exportar PNG** ou
@@ -92,9 +92,9 @@ O primeiro usa o período de 10 a 12 de outubro das referências; revise as data
 cada campanha. Aplicar um conjunto substitui textos e limpa preços/desconto,
 preservando imagens e formato. Trocar apenas o formato preserva todos os campos.
 
-## Mês da Mídia Física e Black Friday — editor de ofertas
+## Mês da Mídia Física — editor de ofertas
 
-O modelo **MÊS DA MÍDIA FÍSICA** e o **MODELO BLACK FRIDAY** compartilham um editor
+O modelo **MÊS DA MÍDIA FÍSICA** oferece um editor
 avançado de carrossel 1080 × 1350, sem limite editorial de páginas:
 
 - **Vitrine**, **Lado a lado** e **Arte em destaque**, escolhidos por oferta.
@@ -117,3 +117,7 @@ As opções são individuais por página. Os banners desktop/mobile continuam di
 Validação desta atualização: 12 testes automatizados e testes no Chromium das três
 composições nos dois modelos, incluindo duplicação pela interface. PNGs nativos das
 três composições do Mês da Mídia Física foram exportados e inspecionados.
+
+O carrossel Black Friday foi retirado da seleção por duplicar o Mês da Mídia Física.
+Projetos antigos são migrados automaticamente, preservando imagens, preços, páginas
+e composição. O banner Black Friday desktop/mobile permanece disponível.

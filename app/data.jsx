@@ -36,7 +36,6 @@ const TEMPLATES = [
   { id:'carousel', label:'CARROSSEL',      ratio:'4:5', w:1080, h:1350, note:'Quantidade livre de páginas' },
   { id:'bfbanner', label:'BANNER BLACK FRIDAY', ratio:'100:29', w:1500, h:435, note:'Desktop + Mobile · até 5 jogos' },
   { id:'physicalmonth', label:'MÊS DA MÍDIA FÍSICA', ratio:'4:5', w:1080, h:1350, note:'Vitrine · mockups · ofertas · carrossel' },
-  { id:'blackfriday', label:'MODELO BLACK FRIDAY', ratio:'4:5', w:1080, h:1350, note:'Carrossel de ofertas · de / por' },
   { id:'block',    label:'POST BLOCADO',   ratio:'4:5', w:1080, h:1350, note:'Tipografia forte, cor sólida' },
   { id:'image',    label:'POST C/ IMAGEM', ratio:'4:5', w:1080, h:1350, note:'Texto + imagem em destaque' },
   { id:'quiz',     label:'QUIZ',           ratio:'4:5', w:1080, h:1350, note:'Pergunta ou “esse ou aquele”' },

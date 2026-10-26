@@ -71,3 +71,8 @@ test('all offer compositions render independent images, mockups and optional pri
  }
  const hidden=run("BlackFridayBody({s:{template:'physicalmonth',pages:{},pageCount:1,offerShowPrice:false,salePrice:'R$ 99',oldPrice:'R$ 199'},tag:TAGS[0],pageIndex:0})");assert.equal(nodes(hidden,n=>n.type==='del').length,0);assert.ok(!JSON.stringify(hidden).includes('R$ 99'));
 });
+test('retired Black Friday carousel migrates without losing offers or layouts',()=>{
+ ctx.localStorage.getItem=()=>JSON.stringify({template:'blackfriday',pageCount:3,current:2,title:'CAPA',image:'cover.png',salePrice:'R$ 99',pages:{0:{title:'A',mockup:'case.png'},1:{title:'B',image:'art.png',offerLayout:'split'}}});
+ const s=run('loadState()');assert.equal(s.template,'physicalmonth');assert.equal(s.current,2);assert.equal(s.offerLayout,'poster');assert.equal(s.image,'cover.png');assert.equal(s.salePrice,'R$ 99');assert.equal(s.pages[0].offerLayout,'showcase');assert.equal(s.pages[0].mockup,'case.png');assert.equal(s.pages[1].offerLayout,'split');assert.equal(s.pages[1].image,'art.png');
+ assert.equal(run("TEMPLATES.some(t=>t.id==='blackfriday')"),false);assert.equal(run("TEMPLATES.some(t=>t.id==='bfbanner')"),true);
+});
