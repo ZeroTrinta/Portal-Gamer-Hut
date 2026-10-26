@@ -91,3 +91,29 @@ O mobile reorganiza a composição na vertical; cinco jogos usam duas fileiras.
 O primeiro usa o período de 10 a 12 de outubro das referências; revise as datas para
 cada campanha. Aplicar um conjunto substitui textos e limpa preços/desconto,
 preservando imagens e formato. Trocar apenas o formato preserva todos os campos.
+
+## Mês da Mídia Física e Black Friday — editor de ofertas
+
+O modelo **MÊS DA MÍDIA FÍSICA** e o **MODELO BLACK FRIDAY** compartilham um editor
+avançado de carrossel 1080 × 1350, sem limite editorial de páginas:
+
+- **Vitrine**, **Lado a lado** e **Arte em destaque**, escolhidos por oferta.
+- Mockup independente do fundo: PNG recortado ou capa, com tamanho, rotação,
+  deslocamento horizontal/vertical e acabamento de caixa opcional.
+- Fundos **Estúdio com luz**, **Grade retrô**, **Faixas diagonais**, **Cor sólida**
+  e **Imagem enviada**, com cor de destaque, cor de fundo e escurecimento.
+- Imagem de fundo por página, com enquadramento, zoom e desfoque.
+- Plataforma, edição, título, descrição, selo/desconto manual, preço anterior
+  riscado, preço promocional, condição e chamada final. O bloco de preço pode
+  ser ocultado. Preços e descontos não são inventados nem consultados automaticamente.
+- **Duplicar esta oferta no final** copia os campos criativos e mantém as outras
+  páginas, inclusive as ocultadas ao reduzir a quantidade.
+
+O exportador detecta textos que não cabem e pede para encurtá-los. Ajuste o tamanho
+do título para nomes longos. Os campos antigos de preço e imagem do Black Friday
+continuam compatíveis; páginas antigas sem mockup abrem em Arte em destaque.
+As opções são individuais por página. Os banners desktop/mobile continuam disponíveis.
+
+Validação desta atualização: 12 testes automatizados e testes no Chromium das três
+composições nos dois modelos, incluindo duplicação pela interface. PNGs nativos das
+três composições do Mês da Mídia Física foram exportados e inspecionados.

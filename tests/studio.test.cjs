@@ -53,3 +53,21 @@ test('campaign presets contain editable signature and reference dates only for p
   assert.ok(JSON.stringify(tree).includes(run(`BANNER_CAMPAIGNS.${preset}.bannerSubtitle`)));
  }
 });
+test('physical media is an offer carousel and preserves many saved pages',()=>{
+ ctx.localStorage.getItem=()=>JSON.stringify({template:'physicalmonth',pageCount:120,current:119,pages:{118:{title:'JOGO FINAL',mockup:'case.png',offerBg:'grid',salePrice:'R$ 99'}}});
+ assert.equal(run('loadState().template'),'physicalmonth');assert.equal(run('loadState().pageCount'),120);
+ assert.equal(run("isOfferTemplate('physicalmonth')"),true);
+ assert.equal(run("PostStage({s:{template:'physicalmonth',pageCount:1,pages:{}}}).children[0].type.name"),'BlackFridayBody');
+});
+test('duplicate offer copies creative fields only and appends without removing hidden offers',()=>{
+ const s=run("duplicateOfferPage({template:'physicalmonth',current:0,pageCount:1,title:'A',mockup:'a.png',offerLayout:'split',offerAccent:'#aabbcc',salePrice:'R$ 99',pages:{4:{title:'hidden'}}})");
+ assert.equal(s.pageCount,2);assert.equal(s.current,1);assert.equal(s.pages[0].mockup,'a.png');assert.equal(s.pages[0].offerLayout,'split');assert.equal(s.pages[0].template,undefined);assert.equal(s.pages[5].title,'hidden');
+ const other=run("duplicateOfferPage({current:1,pageCount:2,title:'cover',pages:{0:{title:'SECOND',mockup:'b.png'}}})");assert.equal(other.pages[1].title,'SECOND');
+});
+test('all offer compositions render independent images, mockups and optional prices',()=>{
+ for(const layout of ['showcase','split','poster']){
+  const tree=run(`BlackFridayBody({s:{template:'physicalmonth',pageCount:2,pages:{0:{title:'TEST GAME',mockup:'mockup.png',image:'background.png',offerLayout:'${layout}',salePrice:'R$ 99',oldPrice:'R$ 199',offerPlatform:'PS5',offerBadge:'DESTAQUE'}}},tag:TAGS[0],pageIndex:1})`);
+  assert.equal(nodes(tree,n=>n.type==='img'&&n.props.src==='mockup.png').length,1);assert.equal(nodes(tree,n=>n.type==='del')[0].children[0],'R$ 199');assert.ok(JSON.stringify(tree).includes('background.png'));
+ }
+ const hidden=run("BlackFridayBody({s:{template:'physicalmonth',pages:{},pageCount:1,offerShowPrice:false,salePrice:'R$ 99',oldPrice:'R$ 199'},tag:TAGS[0],pageIndex:0})");assert.equal(nodes(hidden,n=>n.type==='del').length,0);assert.ok(!JSON.stringify(hidden).includes('R$ 99'));
+});

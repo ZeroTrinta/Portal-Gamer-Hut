@@ -669,7 +669,7 @@ function PostStage({ s, pageIndex=0, stageRef, exporting=false }){
   if(s.template==='block')    body = <BlockBody s={s} tag={tag}/>;
   else if(s.template==='image') body = <ImageBody s={s} tag={tag}/>;
   else if(s.template==='bfbanner') body = <BlackFridayBanner s={s} tag={tag}/>;
-  else if(s.template==='blackfriday') body = <BlackFridayBody s={s} tag={tag} pageIndex={pageIndex}/>;
+  else if(isOfferTemplate(s.template)) body = <BlackFridayBody s={s} tag={tag} pageIndex={pageIndex}/>;
   else if(s.template==='carousel') body = <CarouselBody s={s} tag={tag} pageIndex={pageIndex} exporting={exporting}/>;
   else if(s.template==='quiz') body = <QuizBody s={s} tag={tag}/>;
   else if(s.template==='ranking') body = <RankingBody s={s} tag={tag}/>;
@@ -808,27 +808,49 @@ Object.assign(window, { PostStage, stageDims, drawVideoComposite });
 
 /* One independently editable offer per carousel page. */
 function BlackFridayBody({ s, tag, pageIndex }){
-  const offer = pageIndex===0 ? s : (s.pages[pageIndex-1]||{});
-  const title = offer.title||'NOME DO JOGO';
-  const price = offer.salePrice||'PREÇO PROMOCIONAL';
-  const titleSize = Math.min(s.titleSize||92, title.length>70?64:title.length>42?78:104);
-  return <div style={{position:'absolute',inset:0,background:GH.bg,overflow:'hidden'}}>
-    <div style={{position:'absolute',inset:0}}><ImageOrSlot src={offer.image} blur={offer.imageBlur} zoom={offer.imageZoom} x={offer.imageX} y={offer.imageY} label="ARTE DO JOGO"/></div>
-    <div style={{position:'absolute',inset:0,background:'linear-gradient(180deg,rgba(0,0,0,.65),transparent 32%,rgba(0,0,0,.8) 60%,#0B0B0A 94%)'}}/>
-    <div style={{position:'absolute',top:60,left:64,right:64,display:'flex',justifyContent:'space-between',alignItems:'center',gap:24}}>
-      <span className="gh-display" style={{background:tag.color,color:readableOn(tag.color),padding:'18px 26px',fontSize:42,letterSpacing:'-.02em'}}>BLACK FRIDAY</span>
-      <span className="gh-mono" style={{color:GH.white,fontSize:24}}>{String(pageIndex+1).padStart(2,'0')} / {String(s.pageCount).padStart(2,'0')}</span>
+  const offer=pageIndex===0?s:(s.pages[pageIndex-1]||{});
+  const month=s.template==='physicalmonth';
+  const accent=offer.offerAccent||tag.color;
+  const layout=offerLayout(offer,s.template), split=layout==='split', poster=layout==='poster';
+  const bg=offer.offerBg||(offer.image?'image':'glow');
+  const title=offer.title||'SEU PRÓXIMO JOGO';
+  const size=Math.min(offer.offerTitleSize||66,title.length>65?48:title.length>38?60:100);
+  const price=offer.salePrice||'';
+  const text={overflow:'hidden',overflowWrap:'anywhere'};
+  const area=split?{left:540,top:355,width:490,height:710}:{left:64,top:315,width:952,height:490};
+  return <div style={{position:'absolute',inset:0,overflow:'hidden',background:offer.offerBgColor||'#111113',color:GH.white}}>
+    {bg==='image' && offer.image && <div style={{position:'absolute',inset:0}}><ImageOrSlot src={offer.image} blur={offer.imageBlur} zoom={offer.imageZoom} x={offer.imageX} y={offer.imageY}/></div>}
+    {bg==='glow' && <div style={{position:'absolute',inset:0,background:`radial-gradient(ellipse at 65% 42%,${accent}77,transparent 58%),linear-gradient(155deg,transparent,#000)`}}/>}
+    {bg==='grid' && <div style={{position:'absolute',inset:0,backgroundImage:`linear-gradient(${accent}22 1px,transparent 1px),linear-gradient(90deg,${accent}22 1px,transparent 1px),radial-gradient(ellipse at 60% 40%,${accent}44,transparent 65%)`,backgroundSize:'64px 64px,64px 64px,100% 100%'}}/>}
+    {bg==='diagonal' && <div style={{position:'absolute',inset:0,background:`repeating-linear-gradient(130deg,transparent 0 100px,${accent}25 100px 160px),radial-gradient(ellipse at 75% 45%,${accent}55,transparent 60%)`}}/>}
+    <div style={{position:'absolute',inset:0,background:`rgba(0,0,0,${(offer.offerShade??35)/100})`}}/>
+    <div style={{position:'absolute',inset:0,background:'linear-gradient(180deg,rgba(0,0,0,.4),transparent 25%,transparent 50%,rgba(0,0,0,.85) 94%)'}}/>
+    <div style={{position:'absolute',left:64,right:64,top:48,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+      <Lockup h={38} color="white"/><span className="gh-mono" style={{fontSize:20,color:'#c9c5c0',letterSpacing:3}}>{String(pageIndex+1).padStart(2,'0')} / {String(s.pageCount).padStart(2,'0')}</span>
     </div>
-    <div style={{position:'absolute',left:64,right:64,bottom:165,display:'flex',flexDirection:'column',gap:24}}>
-      <h2 className="gh-display" style={{margin:0,color:GH.white,fontSize:titleSize,lineHeight:1.04,letterSpacing:'-.035em',overflowWrap:'anywhere',textShadow:'0 4px 24px #000'}}>{title}</h2>
-      <div style={{borderLeft:`8px solid ${tag.color}`,background:'rgba(11,11,10,.9)',padding:'26px 32px'}}>
-        {offer.oldPrice && <div className="gh-body" style={{color:'#C9C5C0',fontSize:36,overflowWrap:'anywhere'}}>DE <del style={{textDecorationThickness:3}}>{offer.oldPrice}</del></div>}
-        <div className="gh-mono" style={{color:GH.white,fontSize:22,marginTop:12}}>POR</div>
-        <div className="gh-display" style={{color:tag.color,fontSize:price.length>16?54:price.length>11?76:112,lineHeight:1.08,letterSpacing:'-.04em',overflowWrap:'anywhere'}}>{price}</div>
-        {offer.offerNote && <p className="gh-body" style={{margin:'16px 0 0',color:GH.white,fontSize:25,lineHeight:1.3,overflowWrap:'anywhere'}}>{offer.offerNote}</p>}
-      </div>
+    <div style={{position:'absolute',left:64,right:64,top:130}}>
+      <div className="gh-mono" style={{fontSize:20,letterSpacing:5,color:accent,marginBottom:8}}>{month?'EM NOVEMBRO, O JOGO É SEU':'OFERTAS PARA SUA COLEÇÃO'}</div>
+      <h1 className="gh-display" style={{fontSize:month?66:86,lineHeight:1.1,letterSpacing:'-.04em',margin:0}}>{month?'MÊS DA MÍDIA':'BLACK'} <span style={{color:accent}}>{month?'FÍSICA':'FRIDAY'}</span></h1>
+      <div style={{height:2,marginTop:24,background:`linear-gradient(90deg,${accent},transparent)`}}/>
     </div>
-    <LogoFooter onImage/>
+    {(!poster||offer.mockup) && <div style={{position:'absolute',...area}}>
+      {!poster && <div style={{position:'absolute',left:'10%',right:'10%',bottom:5,height:45,borderRadius:'50%',background:`linear-gradient(180deg,${accent}55,transparent)`,borderTop:`2px solid ${accent}88`,boxShadow:`0 -15px 70px ${accent}33`}}/>}
+      {offer.mockup ? <div style={{position:'absolute',inset:'7% 14%',transform:`translate(${offer.mockupX||0}px,${offer.mockupY||0}px) rotate(${offer.mockupRotate??-5}deg) scale(${(offer.mockupScale??90)/100})`,display:'flex',alignItems:'center',justifyContent:'center'}}>
+        <img src={offer.mockup} alt="" style={{display:'block',maxWidth:'100%',maxHeight:'100%',objectFit:'contain',filter:`drop-shadow(0 20px 24px #000) drop-shadow(0 0 14px ${accent}55)`,...(offer.offerFrame==='case'?{border:'7px solid #27272b',borderLeft:'13px solid #333338',borderRadius:12,boxShadow:'8px 10px 0 #09090b'}:{})}}/>
+      </div>:<div className="gh-mono" style={{position:'absolute',inset:'12% 22%',border:`1px dashed ${accent}66`,borderRadius:18,display:'grid',placeItems:'center',fontSize:22,color:accent,textAlign:'center',padding:25}}>ADICIONE O MOCKUP<br/>OU A CAPA DO JOGO</div>}
+    </div>}
+    {offer.offerBadge && <div data-offer-text className="gh-display" style={{...text,position:'absolute',right:64,top:308,maxWidth:400,maxHeight:100,padding:'16px 24px',background:accent,color:readableOn(accent),fontSize:32,lineHeight:1.2,borderRadius:8,transform:'rotate(3deg)',boxShadow:'0 12px 35px #0007'}}>{offer.offerBadge}</div>}
+    <div data-offer-text className="gh-mono" style={{...text,position:'absolute',left:64,top:split?348:832,width:split?440:952,height:32,fontSize:21,lineHeight:1.3,color:accent}}>{[offer.offerPlatform,offer.offerEdition].filter(Boolean).join(' / ')}</div>
+    <h2 data-offer-text className="gh-display" style={{...text,position:'absolute',left:64,top:split?402:870,width:split?440:952,height:split?260:160,margin:0,fontSize:size,lineHeight:1.15,letterSpacing:'-.035em',textShadow:'0 3px 18px #000'}}>{title}</h2>
+    {offer.offerDescription && <div data-offer-text className="gh-body" style={{...text,position:'absolute',left:64,top:split?690:1034,width:split?440:952,height:split?98:34,fontSize:24,lineHeight:1.3,color:'#c9c5c0'}}>{offer.offerDescription}</div>}
+    {offer.offerShowPrice!==false && (price||offer.oldPrice) && <div style={{position:'absolute',left:64,top:split?830:1080,width:split?440:952,height:split?260:142,borderRadius:18,border:`1px solid ${accent}88`,background:'rgba(9,9,11,.88)',boxShadow:`0 0 45px ${accent}18`,padding:split?'22px 24px':'14px 26px',display:'flex',flexDirection:split?'column':'row',gap:split?12:26,alignItems:split?'flex-start':'center',justifyContent:'space-between'}}>
+      {offer.oldPrice && <div data-offer-text className="gh-body" style={{...text,color:'#b9b5b2',fontSize:split?25:28,lineHeight:1.3,maxHeight:80,flexShrink:0}}>DE <del>{offer.oldPrice}</del></div>}
+      {price && <div style={{minWidth:0}}><div className="gh-mono" style={{fontSize:17,letterSpacing:2,color:accent}}>POR</div><div data-offer-text className="gh-display" style={{...text,color:accent,fontSize:split?price.length>12?45:63:price.length>12?60:78,lineHeight:1.15,maxHeight:110,letterSpacing:'-.04em'}}>{price}</div></div>}
+    </div>}
+    {offer.offerShowPrice!==false && offer.offerNote && <div data-offer-text className="gh-body" style={{...text,position:'absolute',left:64,top:split?1120:1234,width:split?440:952,height:split?110:48,fontSize:22,lineHeight:1.3,color:'#c9c5c0'}}>{offer.offerNote}</div>}
+    <div style={{position:'absolute',left:64,right:64,bottom:34,borderTop:'1px solid #ffffff25',paddingTop:18,display:'flex',justifyContent:'space-between',alignItems:'center',gap:24}}>
+      <span data-offer-text className="gh-mono" style={{...text,fontSize:18,letterSpacing:1,maxHeight:26}}>{offer.offerCta??'CONFIRA NA GAMER HUT'} →</span><span className="gh-mono" style={{fontSize:17,color:accent,whiteSpace:'nowrap'}}>MÍDIA FÍSICA. SEMPRE.</span>
+    </div>
   </div>;
 }
 
