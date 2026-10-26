@@ -121,3 +121,12 @@ três composições do Mês da Mídia Física foram exportados e inspecionados.
 O carrossel Black Friday foi retirado da seleção por duplicar o Mês da Mídia Física.
 Projetos antigos são migrados automaticamente, preservando imagens, preços, páginas
 e composição. O banner Black Friday desktop/mobile permanece disponível.
+
+### Stories do carrossel
+
+Em **Mês da Mídia Física → Formato do carrossel**, alterne entre **Feed 4:5
+(1080 × 1350)** e **Stories 9:16 (1080 × 1920)**. A seleção vale para todas as
+páginas e mantém ofertas, mockups, preços e posição atual. No Stories, a composição
+original fica centralizada com 285 px adicionais acima e abaixo; o fundo preenche
+a altura inteira. Exportar PNG e Todas usam o formato escolhido, indicado no nome
+dos arquivos. Essa opção é independente do formato de outros modelos.
