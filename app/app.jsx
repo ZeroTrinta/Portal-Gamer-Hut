@@ -48,6 +48,7 @@ const DEFAULT_STATE = {
 
 const PRESETS = {
   bfbanner: { template:'bfbanner', tagId:'blackfriday', fill:false, ink:'white' },
+  physicalmonth: {template:'physicalmonth',tagId:'blackfriday',fill:false,ink:'white',titleSize:76},
   blackfriday: { template:'blackfriday', tagId:'blackfriday', fill:false, ink:'white', titleSize:92 },
   block:    { template:'block', tagId:'pre-venda', pattern:'solid', fill:true, eyebrow:'CHEGOU NA LOJA',
               title:'MÍDIA FÍSICA NEVER DIES', subtitle:'Drop toda sexta · estoque limitado', titleSize:120 },
@@ -74,7 +75,7 @@ function loadState(){
     if(!raw || typeof raw!=='object' || Array.isArray(raw)) return DEFAULT_STATE;
     const state = { ...DEFAULT_STATE, ...raw };
     if(!TEMPLATES.some(t=>t.id===state.template)) state.template='carousel';
-    const minPages = state.template==='blackfriday'?1:3;
+    const minPages = isOfferTemplate(state.template)?1:3;
     state.pageCount=validPageCount(state.pageCount, minPages) || 4;
     state.current=Math.max(0,Math.min(state.pageCount-1,Math.trunc(Number(state.current))||0));
     state.pages=raw.pages && typeof raw.pages==='object' ? Object.fromEntries(Object.entries(raw.pages).filter(([k,v])=>/^\d+$/.test(k) && v && typeof v==='object')) : DEFAULT_STATE.pages;
@@ -105,7 +106,7 @@ function App(){
 
   const tpl = TEMPLATES.find(t=>t.id===s.template) || TEMPLATES.find(t=>t.id==='carousel');
   const tag = TAGS.find(t=>t.id===s.tagId) || TAGS[0];
-  const isCarousel = (s.template==='carousel'||s.template==='blackfriday');
+  const isCarousel = (s.template==='carousel'||isOfferTemplate(s.template));
   const onCover = !isCarousel || s.current===0;
   const pageIdx = isCarousel ? s.current : 0;
   const dims = stageDims(s, pageIdx);
@@ -221,6 +222,10 @@ function App(){
         })));
     await document.fonts.ready;
     await new Promise(r=>setTimeout(r,60));
+      if(isOfferTemplate(state.template)){
+        const clipped=[...node.querySelectorAll('[data-offer-text]')].some(el=>el.scrollHeight>el.clientHeight+3||el.scrollWidth>el.clientWidth+3);
+        if(clipped) throw new Error('Há texto demais nesta oferta. Reduza o título ou os campos complementares.');
+      }
       if(state.template==='bfbanner'){
         const clipped=[...node.querySelectorAll('[data-banner-text], [data-banner-region]')].some(el=>el.scrollHeight>el.clientHeight+2 || el.scrollWidth>el.clientWidth+2);
         if(clipped) throw new Error('Encurte os textos do banner para caber no formato escolhido.');
@@ -477,7 +482,7 @@ function TopBar({ s, dims, tag, busy, isVideoPage, onExport, onExportAll, onExpo
                 fontSize:12, fontWeight:700, letterSpacing:'.04em' }}>● EXPORTAR VÍDEO</button>
             </>
           : <>
-              {(s.template==='carousel'||s.template==='blackfriday') &&
+              {(s.template==='carousel'||isOfferTemplate(s.template)) &&
                 <button onClick={onExportAll} disabled={busy} className="gh-mono" style={{ cursor:'pointer',
                   background:'transparent', color:GH.white, border:`1px solid ${GH.lineSoft}`, padding:'9px 14px',
                   borderRadius:8, fontSize:12, fontWeight:700 }}>↓ TODAS</button>}
@@ -507,7 +512,7 @@ function PreviewBar({ s, dims, setS, isCarousel }){
       </>}
       <span className="gh-mono" style={{ color:GH.mut, fontSize:11, letterSpacing:'.1em',
         marginLeft:isCarousel?8:0 }}>
-        {isCarousel ? (s.current===0?'CAPA':'PÁGINA '+(s.current+1)) : 'PREVIEW'} · {dims.ratio}
+        {isCarousel ? (isOfferTemplate(s.template)?'OFERTA '+(s.current+1):s.current===0?'CAPA':'PÁGINA '+(s.current+1)) : 'PREVIEW'} · {dims.ratio}
       </span>
     </div>
   );

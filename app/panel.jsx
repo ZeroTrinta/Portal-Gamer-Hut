@@ -4,7 +4,7 @@
 
 function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
   const isBanner = s.template==='bfbanner';
-  const isBlackFriday = s.template==='blackfriday';
+  const isBlackFriday = isOfferTemplate(s.template);
   const isCarousel = s.template==='carousel'||isBlackFriday;
   const isImage    = s.template==='image';
   const isReels    = s.template==='reels';
@@ -56,14 +56,15 @@ function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
               </button>
             ))}
           </div>
+          {isBlackFriday && <button onClick={()=>setS(duplicateOfferPage)} style={{...inputBase,marginTop:12,cursor:'pointer',color:GH.orange}}>+ DUPLICAR ESTA OFERTA NO FINAL</button>}
           <div style={{marginTop:14}}><PageNumber label="Ir para página" value={s.current+1} min={1} max={s.pageCount}
             onChange={n=>setS(p=>({...p,current:n-1}))}/></div>
         </CtrlSection>}
 
       {/* CONTENT */}
-      <CtrlSection title={isCarousel ? (onCover?'CONTEÚDO · CAPA':'CONTEÚDO · PÁGINA '+(pageIdx+1)) : 'CONTEÚDO'}>
+      <CtrlSection title={isBlackFriday ? 'CONTEÚDO · OFERTA '+(pageIdx+1) : isCarousel ? (onCover?'CONTEÚDO · CAPA':'CONTEÚDO · PÁGINA '+(pageIdx+1)) : 'CONTEÚDO'}>
         {/* carousel content page */}
-        {isBanner ? <BannerFields s={s} set={set}/> : isBlackFriday ? <BlackFridayFields offer={onCover?s:curPage} setOffer={onCover?set:setPage}/> : isCarousel && !onCover ? <>
+        {isBanner ? <BannerFields s={s} set={set}/> : isBlackFriday ? <BlackFridayFields offer={onCover?s:curPage} setOffer={onCover?set:setPage} template={s.template}/> : isCarousel && !onCover ? <>
           <div style={{ marginBottom:18 }}>
             <Segmented value={curPage.type==='video'?'video':'standard'} onChange={v=>{
               if(v==='video') setPage({ type:'video',
@@ -240,7 +241,7 @@ function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
         </CtrlSection>}
 
       {/* TYPE */}
-      {!isBanner && (onCover || isBlackFriday) &&
+      {!isBanner && !isBlackFriday && onCover &&
         <CtrlSection title="TIPOGRAFIA" right={
           <span className="gh-pixel" style={{ color:GH.orange, fontSize:11 }}>{s.titleSize}px</span>}>
           <input type="range" min={64} max={172} value={s.titleSize}
@@ -518,19 +519,45 @@ function ArrivalsFields({ s, set, setS }){
 Object.assign(window, { Controls });
 
 
-function BlackFridayFields({ offer, setOffer }){
+function BlackFridayFields({ offer, setOffer, template='blackfriday' }){
+  const slider=(label,key,min,max,def,step=1)=><Field label={label}><div style={{display:'flex',gap:12,alignItems:'center'}}><input aria-label={label} type="range" min={min} max={max} step={step} value={offer[key]??def} onChange={e=>setOffer({[key]:+e.target.value})} style={{flex:1,accentColor:GH.orange}}/><span style={{color:GH.mut,fontSize:12}}>{offer[key]??def}</span></div></Field>;
   return <>
+    <Field label="Composição desta página"><Segmented value={offerLayout(offer,template)} onChange={v=>setOffer({offerLayout:v})} options={[{id:'showcase',label:'VITRINE'},{id:'split',label:'LADO A LADO'},{id:'poster',label:'ARTE EM DESTAQUE'}]}/></Field>
     <Field label="Nome do jogo"><TextArea value={offer.title||''} onChange={e=>setOffer({title:e.target.value})}/></Field>
-    <Field label="Preço anterior (riscado)"><TextInput value={offer.oldPrice||''} placeholder="R$ 349,90" onChange={e=>setOffer({oldPrice:e.target.value})}/></Field>
-    <Field label="Preço promocional"><TextInput value={offer.salePrice||''} placeholder="R$ 199,90" onChange={e=>setOffer({salePrice:e.target.value})}/></Field>
-    <Field label="Condição da oferta (opcional)"><TextInput value={offer.offerNote||''} placeholder="À vista no Pix · enquanto durarem os estoques" onChange={e=>setOffer({offerNote:e.target.value})}/></Field>
-    <Field label="Arte do jogo (fundo)">
-      <ImageDrop value={offer.image} onChange={v=>setOffer({image:v})}
-        blur={offer.imageBlur} onBlur={v=>setOffer({imageBlur:v})}
-        zoom={offer.imageZoom} onZoom={v=>setOffer({imageZoom:v})}
-        imgX={offer.imageX} onImgX={v=>setOffer({imageX:v})}
-        imgY={offer.imageY} onImgY={v=>setOffer({imageY:v})}/>
-    </Field>
+    {slider('Tamanho do título','offerTitleSize',40,100,66)}
+    <Field label="Plataforma"><TextInput value={offer.offerPlatform||''} placeholder="PS5 · XBOX · SWITCH" onChange={e=>setOffer({offerPlatform:e.target.value})}/></Field>
+    <Field label="Edição / formato"><TextInput value={offer.offerEdition||''} placeholder="MÍDIA FÍSICA · EDIÇÃO ESPECIAL" onChange={e=>setOffer({offerEdition:e.target.value})}/></Field>
+    <Field label="Descrição curta (opcional)"><TextInput value={offer.offerDescription||''} placeholder="Um novo lugar na sua coleção" onChange={e=>setOffer({offerDescription:e.target.value})}/></Field>
+    <Field label="Selo / desconto (opcional)"><TextInput value={offer.offerBadge||''} placeholder="30% OFF · EXCLUSIVO · DESTAQUE" onChange={e=>setOffer({offerBadge:e.target.value})}/></Field>
+    <Toggle label="Mostrar bloco de preço" checked={offer.offerShowPrice!==false} onChange={v=>setOffer({offerShowPrice:v})}/>
+    {offer.offerShowPrice!==false && <div style={{marginTop:16}}>
+      <Field label="Preço anterior (riscado)"><TextInput value={offer.oldPrice||''} placeholder="R$ 349,90" onChange={e=>setOffer({oldPrice:e.target.value})}/></Field>
+      <Field label="Preço promocional"><TextInput value={offer.salePrice||''} placeholder="R$ 199,90" onChange={e=>setOffer({salePrice:e.target.value})}/></Field>
+      <Field label="Condição da oferta"><TextInput value={offer.offerNote||''} placeholder="À vista no Pix · enquanto durarem os estoques" onChange={e=>setOffer({offerNote:e.target.value})}/></Field>
+    </div>}
+    <Field label="Chamada no rodapé"><TextInput value={offer.offerCta??'CONFIRA NA GAMER HUT'} onChange={e=>setOffer({offerCta:e.target.value})}/></Field>
+    <details open style={{borderTop:`1px solid ${GH.lineSoft}`,paddingTop:18,marginTop:18,color:GH.white}}><summary style={{cursor:'pointer',marginBottom:18}}>MOCKUP / CAPA DO JOGO</summary>
+      <ImageDrop value={offer.mockup} onChange={v=>setOffer({mockup:v})} label="PNG recortado ou capa do jogo" showAdjustments={false}/>
+      <p style={{fontSize:11,color:GH.mut,lineHeight:1.5}}>O mockup fica separado do fundo e mantém a proporção. PNG transparente é ideal para caixas e edições de colecionador.</p>
+      {offer.mockup && <>
+        <Field label="Acabamento"><Segmented value={offer.offerFrame||'cutout'} onChange={v=>setOffer({offerFrame:v})} options={[{id:'cutout',label:'RECORTE'},{id:'case',label:'CAIXA / CAPA'}]}/></Field>
+        {slider('Tamanho do mockup (%)','mockupScale',40,120,90)}
+        {slider('Rotação do mockup (°)','mockupRotate',-18,18,-5)}
+        {slider('Posição horizontal do mockup','mockupX',-80,80,0)}
+        {slider('Posição vertical do mockup','mockupY',-60,60,0)}
+      </>}
+    </details>
+    <details open style={{borderTop:`1px solid ${GH.lineSoft}`,paddingTop:18,marginTop:18,color:GH.white}}><summary style={{cursor:'pointer',marginBottom:18}}>FUNDO E CORES</summary>
+      <Field label="Fundo desta oferta"><select aria-label="Fundo desta oferta" value={offer.offerBg||(offer.image?'image':'glow')} onChange={e=>setOffer({offerBg:e.target.value})} style={inputBase}>
+        <option value="glow">Estúdio com luz</option><option value="grid">Grade retrô</option><option value="diagonal">Faixas diagonais</option><option value="solid">Cor sólida</option><option value="image">Imagem enviada</option>
+      </select></Field>
+      <Field label="Cor de destaque"><input aria-label="Cor de destaque" type="color" value={offer.offerAccent||GH.orange} onChange={e=>setOffer({offerAccent:e.target.value})}/></Field>
+      <Field label="Cor de fundo"><input aria-label="Cor de fundo" type="color" value={offer.offerBgColor||'#111113'} onChange={e=>setOffer({offerBgColor:e.target.value})}/></Field>
+      <Field label="Imagem / arte de fundo"><ImageDrop value={offer.image} onChange={v=>setOffer({image:v,...(v?{offerBg:'image'}:{})})}
+        blur={offer.imageBlur} onBlur={v=>setOffer({imageBlur:v})} zoom={offer.imageZoom} onZoom={v=>setOffer({imageZoom:v})}
+        imgX={offer.imageX} onImgX={v=>setOffer({imageX:v})} imgY={offer.imageY} onImgY={v=>setOffer({imageY:v})}/></Field>
+      {slider('Escurecer fundo (%)','offerShade',0,90,35)}
+    </details>
   </>;
 }
 

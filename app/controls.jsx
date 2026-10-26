@@ -125,7 +125,7 @@ function Toggle({ label, checked, onChange }){
   );
 }
 
-function ImageDrop({ value, onChange, label='Imagem do jogo', blur, onBlur, zoom, onZoom, imgX, onImgX, imgY, onImgY }){
+function ImageDrop({ value, onChange, label='Imagem do jogo', blur, onBlur, zoom, onZoom, imgX, onImgX, imgY, onImgY, showAdjustments=true }){
   const id = useMemo(()=>'img-'+Math.random().toString(36).slice(2),[]);
   const onFile = f => { if(!f) return; const r=new FileReader(); r.onload=()=>onChange(r.result); r.readAsDataURL(f); };
   return (
@@ -136,9 +136,9 @@ function ImageDrop({ value, onChange, label='Imagem do jogo', blur, onBlur, zoom
         {value
           ? <div style={{ position:'relative' }}>
               <img src={value} alt="" style={{ width:'100%', height:120, objectFit:'cover', display:'block',
-                objectPosition:`${imgX||50}% ${imgY||50}%`,
+                objectPosition:`${imgX??50}% ${imgY??50}%`,
                 transform:`scale(${Math.max(1,(zoom||100)/100).toFixed(3)})`,
-                transformOrigin:`${imgX||50}% ${imgY||50}%`,
+                transformOrigin:`${imgX??50}% ${imgY??50}%`,
                 filter: blur?`blur(${((blur)*0.18).toFixed(1)}px)`:'none' }}/>
               <span className="gh-mono" style={{ position:'absolute', bottom:6, right:8, fontSize:10,
                 background:'rgba(0,0,0,.7)', color:GH.white, padding:'3px 7px', borderRadius:4 }}>TROCAR</span>
@@ -153,7 +153,7 @@ function ImageDrop({ value, onChange, label='Imagem do jogo', blur, onBlur, zoom
         <button onClick={()=>onChange(null)} className="gh-mono" style={{ cursor:'pointer',
           background:'transparent', border:'none', color:GH.mut, fontSize:10, letterSpacing:'.1em' }}>✕ REMOVER</button>
       </div>}
-      {value && (
+      {value && showAdjustments && (
         <div style={{ marginTop:10, background:GH.bg, border:`1px solid ${GH.lineSoft}`, borderRadius:9, padding:'13px 13px 11px' }}>
 
           {/* ZOOM */}
@@ -179,10 +179,10 @@ function ImageDrop({ value, onChange, label='Imagem do jogo', blur, onBlur, zoom
                 <button onClick={()=>onImgX&&onImgX(50)} className="gh-mono" style={{ cursor:'pointer',
                   padding:'3px 8px', borderRadius:5, fontSize:9, background:'transparent',
                   color:GH.mut, border:`1px solid ${GH.lineSoft}`, letterSpacing:'.06em' }}>CENTRO</button>
-                <span className="gh-pixel" style={{ color:GH.orange, fontSize:11, minWidth:38, textAlign:'right' }}>{Math.round(imgX||50)}%</span>
+                <span className="gh-pixel" style={{ color:GH.orange, fontSize:11, minWidth:38, textAlign:'right' }}>{Math.round(imgX??50)}%</span>
               </div>
             </div>
-            <input type="range" min={0} max={100} step={1} value={imgX||50}
+            <input type="range" min={0} max={100} step={1} value={imgX??50}
               onChange={e=>onImgX&&onImgX(+e.target.value)} style={{ width:'100%', accentColor:GH.orange }}/>
           </div>
 
@@ -194,10 +194,10 @@ function ImageDrop({ value, onChange, label='Imagem do jogo', blur, onBlur, zoom
                 <button onClick={()=>onImgY&&onImgY(50)} className="gh-mono" style={{ cursor:'pointer',
                   padding:'3px 8px', borderRadius:5, fontSize:9, background:'transparent',
                   color:GH.mut, border:`1px solid ${GH.lineSoft}`, letterSpacing:'.06em' }}>CENTRO</button>
-                <span className="gh-pixel" style={{ color:GH.orange, fontSize:11, minWidth:38, textAlign:'right' }}>{Math.round(imgY||50)}%</span>
+                <span className="gh-pixel" style={{ color:GH.orange, fontSize:11, minWidth:38, textAlign:'right' }}>{Math.round(imgY??50)}%</span>
               </div>
             </div>
-            <input type="range" min={0} max={100} step={1} value={imgY||50}
+            <input type="range" min={0} max={100} step={1} value={imgY??50}
               onChange={e=>onImgY&&onImgY(+e.target.value)} style={{ width:'100%', accentColor:GH.orange }}/>
           </div>
 

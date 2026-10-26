@@ -35,6 +35,7 @@ const TAGS = [
 const TEMPLATES = [
   { id:'carousel', label:'CARROSSEL',      ratio:'4:5', w:1080, h:1350, note:'Quantidade livre de páginas' },
   { id:'bfbanner', label:'BANNER BLACK FRIDAY', ratio:'100:29', w:1500, h:435, note:'Desktop + Mobile · até 5 jogos' },
+  { id:'physicalmonth', label:'MÊS DA MÍDIA FÍSICA', ratio:'4:5', w:1080, h:1350, note:'Vitrine · mockups · ofertas · carrossel' },
   { id:'blackfriday', label:'MODELO BLACK FRIDAY', ratio:'4:5', w:1080, h:1350, note:'Carrossel de ofertas · de / por' },
   { id:'block',    label:'POST BLOCADO',   ratio:'4:5', w:1080, h:1350, note:'Tipografia forte, cor sólida' },
   { id:'image',    label:'POST C/ IMAGEM', ratio:'4:5', w:1080, h:1350, note:'Texto + imagem em destaque' },
@@ -182,3 +183,14 @@ const BANNER_CAMPAIGNS = {
   black:{bannerTitle:'BLACK',bannerSecondLine:'FÍSICO',bannerPeriod:'',bannerSubtitle:'Ofertas exclusivas para completar sua coleção',bannerSignature:'Em novembro, o jogo é seu',bannerCta:'CONFIRA AS OFERTAS'},
   month:{bannerTitle:'MÊS DA',bannerSecondLine:'MÍDIA FÍSICA',bannerPeriod:'NOVEMBRO',bannerSubtitle:'Seu próximo jogo merece um lugar na coleção',bannerSignature:'Em novembro, o jogo é seu',bannerCta:'EXPLORE A SELEÇÃO'},
 };
+
+function isOfferTemplate(id){ return id==='blackfriday'||id==='physicalmonth'; }
+function offerLayout(offer,template){ return offer.offerLayout || (template==='blackfriday' && !offer.mockup ? 'poster':'showcase'); }
+function duplicateOfferPage(state){
+  const source=state.current===0?state:(state.pages[state.current-1]||{});
+  const fields=['title','oldPrice','salePrice','offerNote','image','imageX','imageY','imageZoom','imageBlur','mockup','mockupScale','mockupRotate','mockupX','mockupY','offerLayout','offerBg','offerBgColor','offerAccent','offerShade','offerPlatform','offerEdition','offerBadge','offerDescription','offerCta','offerShowPrice','offerFrame','offerTitleSize'];
+  const copy=Object.fromEntries(fields.filter(k=>source[k]!==undefined).map(k=>[k,source[k]]));
+  const pages=Object.fromEntries(Object.entries(state.pages||{}).map(([k,v])=>[Number(k)>=state.pageCount-1?Number(k)+1:k,v]));
+  pages[state.pageCount-1]=copy;
+  return {...state,pages,current:state.pageCount,pageCount:state.pageCount+1};
+}
