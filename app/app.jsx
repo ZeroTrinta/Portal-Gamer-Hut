@@ -248,7 +248,7 @@ function App(){
     try{
       const url = await captureToDataUrl(s, pageIdx);
       const tagName = tag.label.toLowerCase().replace(/[^a-z]/g,'');
-      const suffix = isCarousel ? `-p${s.current+1}` : s.template==='bfbanner' ? `-${s.bannerFormat||'desktop'}` : '';
+      const suffix = isCarousel ? `${isOfferTemplate(s.template)?'-'+(s.offerFormat||'feed'):''}-p${s.current+1}` : s.template==='bfbanner' ? `-${s.bannerFormat||'desktop'}` : '';
       triggerDownload(url, `gamerhut-${s.template}-${tagName}${suffix}.png`);
       flashToast('PNG exportado · '+dims.w+'×'+dims.h);
     }catch(e){ flashToast(e.message||'Falha ao exportar'); console.error(e); }
@@ -260,7 +260,7 @@ function App(){
     try{
       for(let i=0;i<s.pageCount;i++){
         const url = await captureToDataUrl(s, i);
-        triggerDownload(url, `gamerhut-${s.template}-p${i+1}.png`);
+        triggerDownload(url, `gamerhut-${s.template}${isOfferTemplate(s.template)?'-'+(s.offerFormat||'feed'):''}-p${i+1}.png`);
         await new Promise(r=>setTimeout(r,180));
       }
       flashToast(s.pageCount+' páginas exportadas');

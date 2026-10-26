@@ -27,6 +27,14 @@ function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
         <TemplatePicker value={s.template} onChange={pickTemplate}/>
       </CtrlSection>
 
+      {isBlackFriday && <CtrlSection title="FORMATO DO CARROSSEL">
+        <Segmented value={s.offerFormat||'feed'} onChange={v=>set({offerFormat:v})}
+          options={[{id:'feed',label:'FEED · 4:5'},{id:'stories',label:'STORIES · 9:16'}]}/>
+        <p className="gh-mono" style={{fontSize:10,color:GH.mut,lineHeight:1.6,margin:'12px 0 0'}}>
+          {s.offerFormat==='stories'?'1080 × 1920 · conteúdo centralizado, fundo ampliado.':'1080 × 1350 · formato para feed.'} O formato vale para todas as páginas.
+        </p>
+      </CtrlSection>}
+
       {(isBlock||isQuiz||isRanking||isArrivals) &&
         <CtrlSection title="FORMATO" right={
           <span className="gh-mono" style={{ color:GH.mut, fontSize:9, letterSpacing:'.1em' }}>

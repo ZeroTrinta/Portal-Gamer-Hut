@@ -654,6 +654,7 @@ function ArrivalsBody({ s, tag }){
    switch to a 9:16 Stories format (1080×1920) */
 function stageDims(s, pageIndex=0){
   const tpl = TEMPLATES.find(t=>t.id===s.template) || TEMPLATES[0];
+  if(isOfferTemplate(s.template) && s.offerFormat==='stories') return {w:1080,h:1920,ratio:'9:16'};
   if(s.template==='bfbanner' && s.bannerFormat==='mobile') return {w:600,h:1269,ratio:'600:1269'};
   if((s.template==='block'||s.template==='quiz'||s.template==='ranking'||s.template==='arrivals') && s.format==='stories'){
     return { w:1080, h:1920, ratio:'9:16' };
@@ -825,6 +826,7 @@ function BlackFridayBody({ s, tag, pageIndex }){
     {bg==='diagonal' && <div style={{position:'absolute',inset:0,background:`repeating-linear-gradient(130deg,transparent 0 100px,${accent}25 100px 160px),radial-gradient(ellipse at 75% 45%,${accent}55,transparent 60%)`}}/>}
     <div style={{position:'absolute',inset:0,background:`rgba(0,0,0,${(offer.offerShade??35)/100})`}}/>
     <div style={{position:'absolute',inset:0,background:'linear-gradient(180deg,rgba(0,0,0,.4),transparent 25%,transparent 50%,rgba(0,0,0,.85) 94%)'}}/>
+    <div data-offer-composition style={{position:'absolute',left:0,right:0,top:s.offerFormat==='stories'?285:0,height:1350}}>
     <div style={{position:'absolute',left:64,right:64,top:48,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
       <Lockup h={38} color="white"/><span className="gh-mono" style={{fontSize:20,color:'#c9c5c0',letterSpacing:3}}>{String(pageIndex+1).padStart(2,'0')} / {String(s.pageCount).padStart(2,'0')}</span>
     </div>
@@ -850,6 +852,7 @@ function BlackFridayBody({ s, tag, pageIndex }){
     {offer.offerShowPrice!==false && offer.offerNote && <div data-offer-text className="gh-body" style={{...text,position:'absolute',left:64,top:split?1120:1234,width:split?440:952,height:split?110:48,fontSize:22,lineHeight:1.3,color:'#c9c5c0'}}>{offer.offerNote}</div>}
     <div style={{position:'absolute',left:64,right:64,bottom:34,borderTop:'1px solid #ffffff25',paddingTop:18,display:'flex',justifyContent:'space-between',alignItems:'center',gap:24}}>
       <span data-offer-text className="gh-mono" style={{...text,fontSize:18,letterSpacing:1,maxHeight:26}}>{offer.offerCta??'CONFIRA NA GAMER HUT'} →</span><span className="gh-mono" style={{fontSize:17,color:accent,whiteSpace:'nowrap'}}>MÍDIA FÍSICA. SEMPRE.</span>
+    </div>
     </div>
   </div>;
 }

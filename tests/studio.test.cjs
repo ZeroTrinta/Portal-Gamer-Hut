@@ -76,3 +76,19 @@ test('retired Black Friday carousel migrates without losing offers or layouts',(
  const s=run('loadState()');assert.equal(s.template,'physicalmonth');assert.equal(s.current,2);assert.equal(s.offerLayout,'poster');assert.equal(s.image,'cover.png');assert.equal(s.salePrice,'R$ 99');assert.equal(s.pages[0].offerLayout,'showcase');assert.equal(s.pages[0].mockup,'case.png');assert.equal(s.pages[1].offerLayout,'split');assert.equal(s.pages[1].image,'art.png');
  assert.equal(run("TEMPLATES.some(t=>t.id==='blackfriday')"),false);assert.equal(run("TEMPLATES.some(t=>t.id==='bfbanner')"),true);
 });
+test('offer Stories center the unchanged composition on every page',()=>{
+ for(const layout of ['showcase','split','poster'])for(const format of ['feed','stories'])for(const current of [0,1]){
+  ctx.offerState={template:'physicalmonth',offerFormat:format,pageCount:2,title:'COVER',offerLayout:layout,salePrice:'R$ 99',pages:{0:{title:'SECOND',mockup:'case.png',offerLayout:layout,salePrice:'R$ 199'}}};
+  const dims=run(`stageDims(offerState,${current})`);assert.equal(dims.w,1080);assert.equal(dims.h,format==='stories'?1920:1350);
+  const stage=run(`PostStage({s:offerState,pageIndex:${current}})`);assert.equal(stage.props.style.height,dims.h);
+  const tree=run(`BlackFridayBody({s:offerState,tag:TAGS[0],pageIndex:${current}})`);
+  const box=nodes(tree,n=>Object.hasOwn(n.props,'data-offer-composition'))[0];assert.equal(box.props.style.height,1350);assert.equal(box.props.style.top,(dims.h-1350)/2);
+  assert.ok(JSON.stringify(box).includes(current===0?'COVER':'SECOND'));
+ }
+});
+test('saved story format preserves offers and does not affect unrelated models',()=>{
+ ctx.localStorage.getItem=()=>JSON.stringify({template:'physicalmonth',offerFormat:'stories',pageCount:50,current:49,pages:{48:{title:'LAST',mockup:'last.png',salePrice:'R$ 10'}}});
+ assert.equal(run('loadState().offerFormat'),'stories');assert.equal(run('loadState().current'),49);assert.equal(run('loadState().pages[48].mockup'),'last.png');
+ assert.equal(run("stageDims({template:'carousel',offerFormat:'stories'}).h"),1350);
+ assert.equal(run("stageDims({template:'bfbanner',offerFormat:'stories'}).h"),435);
+});
