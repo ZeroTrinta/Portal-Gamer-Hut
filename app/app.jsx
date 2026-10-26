@@ -49,7 +49,6 @@ const DEFAULT_STATE = {
 const PRESETS = {
   bfbanner: { template:'bfbanner', tagId:'blackfriday', fill:false, ink:'white' },
   physicalmonth: {template:'physicalmonth',tagId:'blackfriday',fill:false,ink:'white',titleSize:76},
-  blackfriday: { template:'blackfriday', tagId:'blackfriday', fill:false, ink:'white', titleSize:92 },
   block:    { template:'block', tagId:'pre-venda', pattern:'solid', fill:true, eyebrow:'CHEGOU NA LOJA',
               title:'MÍDIA FÍSICA NEVER DIES', subtitle:'Drop toda sexta · estoque limitado', titleSize:120 },
   image:    { template:'image', tagId:'lancamento', pattern:'solid', fill:false, eyebrow:'JÁ DISPONÍVEL',
@@ -74,11 +73,14 @@ function loadState(){
     const raw = JSON.parse(localStorage.getItem('gh-studio')||'null');
     if(!raw || typeof raw!=='object' || Array.isArray(raw)) return DEFAULT_STATE;
     const state = { ...DEFAULT_STATE, ...raw };
+    const migrateBlackFriday=state.template==='blackfriday';
+    if(migrateBlackFriday){ state.template='physicalmonth'; state.offerLayout=offerLayout(state,'blackfriday'); }
     if(!TEMPLATES.some(t=>t.id===state.template)) state.template='carousel';
     const minPages = isOfferTemplate(state.template)?1:3;
     state.pageCount=validPageCount(state.pageCount, minPages) || 4;
     state.current=Math.max(0,Math.min(state.pageCount-1,Math.trunc(Number(state.current))||0));
     state.pages=raw.pages && typeof raw.pages==='object' ? Object.fromEntries(Object.entries(raw.pages).filter(([k,v])=>/^\d+$/.test(k) && v && typeof v==='object')) : DEFAULT_STATE.pages;
+    if(migrateBlackFriday) state.pages=Object.fromEntries(Object.entries(state.pages).map(([k,p])=>[k,{...p,offerLayout:offerLayout(p,'blackfriday')}]));
     // Pages are created on edit, so large carousels do not allocate empty objects.
     state.bannerGames=Array.isArray(raw.bannerGames)?raw.bannerGames.slice(0,5).map(g=>g&&typeof g==='object'?g:{}):[];
     state.bannerCount=Math.max(1,Math.min(5,Math.trunc(Number(raw.bannerCount))||5));
