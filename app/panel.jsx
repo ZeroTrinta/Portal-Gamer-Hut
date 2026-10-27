@@ -54,6 +54,7 @@ function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
           <PageNumber value={s.pageCount} min={isBlackFriday?1:3} label="Quantidade de páginas"
             onChange={n=>setS(p=>({...p,pageCount:n,current:Math.min(p.current,n-1)}))}/>
         }>
+          <div style={{marginBottom:16}}><Toggle label="Mostrar contador de páginas" checked={s.showPageCounter!==false} onChange={v=>set({showPageCounter:v})}/></div>
           <div style={{ display:'flex', gap:7, flexWrap:'wrap' }}>
             {pageWindow(s.current,s.pageCount).map(i=>(
               <button key={i} onClick={()=>setS(p=>({...p,current:i}))} className="gh-mono" style={{

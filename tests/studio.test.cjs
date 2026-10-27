@@ -92,3 +92,19 @@ test('saved story format preserves offers and does not affect unrelated models',
  assert.equal(run("stageDims({template:'carousel',offerFormat:'stories'}).h"),1350);
  assert.equal(run("stageDims({template:'bfbanner',offerFormat:'stories'}).h"),435);
 });
+test('page counters can be hidden across carousels and video previews',()=>{
+ for(const show of [undefined,true,false]){
+ ctx.counterState={template:'physicalmonth',showPageCounter:show,pageCount:12,pages:{0:{title:'TEST'}},title:'COVER'};
+ for(const call of ['BlackFridayBody({s:counterState,tag:TAGS[0],pageIndex:0})','BlackFridayBody({s:counterState,tag:TAGS[0],pageIndex:1})','CarouselBody({s:counterState,tag:TAGS[0],pageIndex:1})','VideoBody({s:counterState,tag:TAGS[0],pg:{},pageIndex:1})']){
+  const n=nodes(run(call),n=>Object.hasOwn(n.props,'data-page-counter'));assert.equal(n.length,show===false?0:1);
+ }
+ }
+});
+test('video compositor respects hidden counter and keeps other text',()=>{
+ for(const show of [true,false]){
+  const texts=[];ctx.canvas=new Proxy({measureText:t=>({width:String(t).length*10}),fillText:t=>texts.push(t),createLinearGradient:()=>({addColorStop(){}})}, {get:(o,k)=>k in o?o[k]:()=>{}});
+  ctx.counterState={showPageCounter:show,pageCount:12};
+  run("drawVideoComposite(canvas,1080,1350,{s:counterState,pg:{title:'TRAILER'},tag:TAGS[0],pageIndex:1})");
+  assert.equal(texts.includes('02/12'),show);assert.ok(texts.includes('TRAILER'));
+ }
+});
