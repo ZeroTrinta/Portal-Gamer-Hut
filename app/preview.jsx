@@ -251,9 +251,9 @@ function VideoBody({ s, tag, pg, pageIndex, exporting }){
         {/* top row */}
         <div style={{ flexShrink:0, display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
           <Seal tag={tag}/>
-          <span className="gh-pixel" style={{ color:tag.color, fontSize:28,
+          {s.showPageCounter!==false && <span data-page-counter className="gh-pixel" style={{ color:tag.color, fontSize:28,
             background:'rgba(11,11,10,.6)', padding:'12px 16px', borderRadius:4 }}>
-            {String(pageIndex+1).padStart(2,'0')}/{String(s.pageCount).padStart(2,'0')}</span>
+            {String(pageIndex+1).padStart(2,'0')}/{String(s.pageCount).padStart(2,'0')}</span>}
         </div>
         {/* title block */}
         <div style={{ flexShrink:0, marginTop:28, textAlign:'center' }}>
@@ -294,9 +294,9 @@ function CarouselBody({ s, tag, pageIndex, exporting }){
       <div style={{ position:'absolute', top:0, left:0, right:0, padding:'60px 64px 0',
         display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
         <Seal tag={tag}/>
-        <span className="gh-pixel" style={{ color:tag.color, fontSize:28,
+        {s.showPageCounter!==false && <span data-page-counter className="gh-pixel" style={{ color:tag.color, fontSize:28,
           background:'rgba(11,11,10,.6)', padding:'12px 16px', borderRadius:4 }}>
-          {String(pageIndex+1).padStart(2,'0')}/{String(s.pageCount).padStart(2,'0')}</span>
+          {String(pageIndex+1).padStart(2,'0')}/{String(s.pageCount).padStart(2,'0')}</span>}
       </div>
       <div style={{ position:'absolute', left:0, right:0, bottom:0, padding:'0 64px 150px',
         display:'flex', flexDirection:'column', gap:24 }}>
@@ -750,12 +750,14 @@ function drawVideoComposite(ctx, W, H, o){
 
   // top row — seal + counter
   drawPill(ctx, PAD, 66, tag.label, tag.color, tag.ink);
+  if(s.showPageCounter!==false){
   const counter = String(pageIndex+1).padStart(2,'0')+'/'+String(s.pageCount).padStart(2,'0');
   ctx.font = '28px "Press Start 2P"';
   const cw = ctx.measureText(counter).width + 32, ch = 56;
   ctx.fillStyle = 'rgba(11,11,10,.6)'; roundRectPath(ctx, W-PAD-cw, 66, cw, ch, 4); ctx.fill();
   ctx.fillStyle = tag.color; ctx.textAlign='left'; ctx.textBaseline='middle';
   ctx.fillText(counter, W-PAD-cw+16, 66+ch/2+1);
+  }
 
   // eyebrow + title (centered, auto-fit to width)
   const maxTextW = W - 2*PAD;
@@ -828,7 +830,7 @@ function BlackFridayBody({ s, tag, pageIndex }){
     <div style={{position:'absolute',inset:0,background:'linear-gradient(180deg,rgba(0,0,0,.4),transparent 25%,transparent 50%,rgba(0,0,0,.85) 94%)'}}/>
     <div data-offer-composition style={{position:'absolute',left:0,right:0,top:s.offerFormat==='stories'?285:0,height:1350}}>
     <div style={{position:'absolute',left:64,right:64,top:48,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-      <Lockup h={38} color="white"/><span className="gh-mono" style={{fontSize:20,color:'#c9c5c0',letterSpacing:3}}>{String(pageIndex+1).padStart(2,'0')} / {String(s.pageCount).padStart(2,'0')}</span>
+      <Lockup h={38} color="white"/>{s.showPageCounter!==false && <span data-page-counter className="gh-mono" style={{fontSize:20,color:'#c9c5c0',letterSpacing:3}}>{String(pageIndex+1).padStart(2,'0')} / {String(s.pageCount).padStart(2,'0')}</span>}
     </div>
     <div style={{position:'absolute',left:64,right:64,top:130}}>
       <div className="gh-mono" style={{fontSize:20,letterSpacing:5,color:accent,marginBottom:8}}>{month?'EM NOVEMBRO, O JOGO É SEU':'OFERTAS PARA SUA COLEÇÃO'}</div>

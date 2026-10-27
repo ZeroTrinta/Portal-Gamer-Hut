@@ -130,3 +130,11 @@ páginas e mantém ofertas, mockups, preços e posição atual. No Stories, a co
 original fica centralizada com 285 px adicionais acima e abaixo; o fundo preenche
 a altura inteira. Exportar PNG e Todas usam o formato escolhido, indicado no nome
 dos arquivos. Essa opção é independente do formato de outros modelos.
+
+### Contador de páginas
+
+Em **Páginas**, a opção **Mostrar contador de páginas** controla o número no canto
+superior direito de todos os slides do carrossel. Vale para o carrossel padrão e
+o Mês da Mídia Física, em Feed e Stories, e para exportações PNG e vídeo. A navegação
+do editor permanece disponível. A preferência é salva junto ao projeto; por padrão
+o contador continua visível.
