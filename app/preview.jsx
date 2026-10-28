@@ -670,6 +670,7 @@ function PostStage({ s, pageIndex=0, stageRef, exporting=false }){
   if(s.template==='block')    body = <BlockBody s={s} tag={tag}/>;
   else if(s.template==='image') body = <ImageBody s={s} tag={tag}/>;
   else if(s.template==='bfbanner') body = <BlackFridayBanner s={s} tag={tag}/>;
+  else if(isCampaignTemplate(s.template)) body = <CampaignBody s={s} pageIndex={pageIndex}/>;
   else if(isOfferTemplate(s.template)) body = <BlackFridayBody s={s} tag={tag} pageIndex={pageIndex}/>;
   else if(s.template==='carousel') body = <CarouselBody s={s} tag={tag} pageIndex={pageIndex} exporting={exporting}/>;
   else if(s.template==='quiz') body = <QuizBody s={s} tag={tag}/>;

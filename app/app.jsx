@@ -48,6 +48,8 @@ const DEFAULT_STATE = {
 
 const PRESETS = {
   bfbanner: { template:'bfbanner', tagId:'blackfriday', fill:false, ink:'white' },
+  physicalhighlights: {template:'physicalhighlights',tagId:'blackfriday',fill:false,ink:'white'},
+  physicallist: {template:'physicallist',tagId:'blackfriday',fill:false,ink:'white'},
   physicalmonth: {template:'physicalmonth',tagId:'blackfriday',fill:false,ink:'white',titleSize:76},
   block:    { template:'block', tagId:'pre-venda', pattern:'solid', fill:true, eyebrow:'CHEGOU NA LOJA',
               title:'MÍDIA FÍSICA NEVER DIES', subtitle:'Drop toda sexta · estoque limitado', titleSize:120 },
@@ -225,8 +227,8 @@ function App(){
     await document.fonts.ready;
     await new Promise(r=>setTimeout(r,60));
       if(isOfferTemplate(state.template)){
-        const clipped=[...node.querySelectorAll('[data-offer-text]')].some(el=>el.scrollHeight>el.clientHeight+3||el.scrollWidth>el.clientWidth+3);
-        if(clipped) throw new Error('Há texto demais nesta oferta. Reduza o título ou os campos complementares.');
+        const clipped=[...node.querySelectorAll('[data-offer-text], [data-campaign-fit]')].some(el=>el.scrollHeight>el.clientHeight+3||el.scrollWidth>el.clientWidth+3);
+        if(clipped) throw new Error('Há texto demais nesta página. Encurte os nomes ou distribua a lista em mais páginas.');
       }
       if(state.template==='bfbanner'){
         const clipped=[...node.querySelectorAll('[data-banner-text], [data-banner-region]')].some(el=>el.scrollHeight>el.clientHeight+2 || el.scrollWidth>el.clientWidth+2);

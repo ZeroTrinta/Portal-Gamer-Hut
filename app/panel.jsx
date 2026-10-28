@@ -73,7 +73,7 @@ function Controls({ s, set, tag, onCover, pageIdx, pickTemplate, setS }){
       {/* CONTENT */}
       <CtrlSection title={isBlackFriday ? 'CONTEÚDO · OFERTA '+(pageIdx+1) : isCarousel ? (onCover?'CONTEÚDO · CAPA':'CONTEÚDO · PÁGINA '+(pageIdx+1)) : 'CONTEÚDO'}>
         {/* carousel content page */}
-        {isBanner ? <BannerFields s={s} set={set}/> : isBlackFriday ? <BlackFridayFields offer={onCover?s:curPage} setOffer={onCover?set:setPage} template={s.template}/> : isCarousel && !onCover ? <>
+        {isBanner ? <BannerFields s={s} set={set}/> : isCampaignTemplate(s.template) ? <CampaignFields offer={onCover?s:curPage} setOffer={onCover?set:setPage} template={s.template}/> : isBlackFriday ? <BlackFridayFields offer={onCover?s:curPage} setOffer={onCover?set:setPage} template={s.template}/> : isCarousel && !onCover ? <>
           <div style={{ marginBottom:18 }}>
             <Segmented value={curPage.type==='video'?'video':'standard'} onChange={v=>{
               if(v==='video') setPage({ type:'video',

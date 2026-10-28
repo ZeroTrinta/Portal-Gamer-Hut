@@ -5,7 +5,7 @@ const vm=require('node:vm');
 const babel=require(process.env.BABEL_PATH||'@babel/standalone');
 const ctx={console,window:{},React:{createElement:(type,props,...children)=>({type,props:props||{},children})},ReactDOM:{createRoot:()=>({render(){}})},document:{getElementById(){}},localStorage:{getItem:()=>null}};
 vm.createContext(ctx);
-for(const f of ['data','preview','controls','panel','app']) vm.runInContext(babel.transform(fs.readFileSync(`app/${f}.jsx`,'utf8'),{presets:['react']}).code,ctx);
+for(const f of ['data','preview','controls','panel','campaign','app']) vm.runInContext(babel.transform(fs.readFileSync(`app/${f}.jsx`,'utf8'),{presets:['react']}).code,ctx);
 const run=code=>vm.runInContext(code,ctx);
 function nodes(n,pred){if(!n||typeof n!=='object')return [];return [...(pred(n)?[n]:[]),...(n.children||[]).flat(Infinity).flatMap(c=>nodes(c,pred))];}
 test('large carousel counts survive reload without allocating pages',()=>{
@@ -57,7 +57,7 @@ test('physical media is an offer carousel and preserves many saved pages',()=>{
  ctx.localStorage.getItem=()=>JSON.stringify({template:'physicalmonth',pageCount:120,current:119,pages:{118:{title:'JOGO FINAL',mockup:'case.png',offerBg:'grid',salePrice:'R$ 99'}}});
  assert.equal(run('loadState().template'),'physicalmonth');assert.equal(run('loadState().pageCount'),120);
  assert.equal(run("isOfferTemplate('physicalmonth')"),true);
- assert.equal(run("PostStage({s:{template:'physicalmonth',pageCount:1,pages:{}}}).children[0].type.name"),'BlackFridayBody');
+ assert.equal(run("PostStage({s:{template:'physicalmonth',pageCount:1,pages:{}}}).children[0].type.name"),'CampaignBody');
 });
 test('duplicate offer copies creative fields only and appends without removing hidden offers',()=>{
  const s=run("duplicateOfferPage({template:'physicalmonth',current:0,pageCount:1,title:'A',mockup:'a.png',offerLayout:'split',offerAccent:'#aabbcc',salePrice:'R$ 99',pages:{4:{title:'hidden'}}})");
@@ -107,4 +107,32 @@ test('video compositor respects hidden counter and keeps other text',()=>{
   run("drawVideoComposite(canvas,1080,1350,{s:counterState,pg:{title:'TRAILER'},tag:TAGS[0],pageIndex:1})");
   assert.equal(texts.includes('02/12'),show);assert.ok(texts.includes('TRAILER'));
  }
+});
+test('all three campaign templates use centered feed and stories canvases',()=>{
+ for(const template of ['physicalhighlights','physicallist','physicalmonth'])for(const format of ['feed','stories']){
+  ctx.campaignState={template,offerFormat:format,pageCount:3,showPageCounter:false,pages:{0:{}}};
+  assert.equal(run('stageDims(campaignState).h'),format==='stories'?1920:1350);
+  assert.equal(run('PostStage({s:campaignState}).children[0].type.name'),'CampaignBody');
+  const tree=run('CampaignBody({s:campaignState,pageIndex:1})');
+  const box=nodes(tree,n=>Object.hasOwn(n.props,'data-offer-composition'))[0];assert.equal(box.props.style.top,format==='stories'?285:0);
+  assert.equal(nodes(tree,n=>Object.hasOwn(n.props,'data-page-counter')).length,0);
+ }
+});
+test('highlight items and list groups are bounded and tolerate incomplete saved content',()=>{
+ assert.equal(run('campaignItems({campaignItemCount:999}).length'),4);
+ assert.equal(run('campaignGroups({campaignGroupCount:999}).length'),4);
+ assert.equal(run('campaignGroups({campaignGroups:[{count:99} ]})[0].items.length'),12);
+ assert.equal(run('campaignItems({campaignItems:[null]})[0].title'),undefined);
+ const tree=run("CampaignHighlights({offer:{campaignItemCount:4,campaignItems:[{title:'A',image:'a.png',oldPrice:'R$ 100',price:'R$ 80'}]},accent:'#ff5500'})");
+ assert.equal(nodes(tree,n=>n.type==='del')[0].children[1],'R$ 100');assert.equal(nodes(tree,n=>n.type==='img'&&n.props.src==='a.png').length,1);
+ const lists=run("CampaignList({offer:{campaignGroupCount:4,campaignGroups:[{name:'ONE',count:7},{name:'TWO',count:5},{name:'THREE',count:2},{name:'FOUR',count:2}]},accent:'#ff5500'})");assert.equal(nodes(lists,n=>Object.hasOwn(n.props,'data-campaign-group')).length,4);
+});
+test('campaign duplication keeps logos and independent nested product lists',()=>{
+ ctx.campaignOriginal={current:0,pageCount:1,pages:{},campaignItems:[{title:'A',price:'R$ 10'}],campaignGroups:[{logo:'logo.png',items:[{title:'B'}]}],campaignBrandLogo:'brand.png'};
+ const duplicate=run('duplicateOfferPage(campaignOriginal)');assert.equal(duplicate.pages[0].campaignBrandLogo,'brand.png');assert.equal(duplicate.pages[0].campaignGroups[0].logo,'logo.png');
+ duplicate.pages[0].campaignItems[0].title='EDITED';assert.equal(ctx.campaignOriginal.campaignItems[0].title,'A');
+});
+test('individual campaign uses optional mockup, old/new price and stock disclaimer',()=>{
+ const tree=run("CampaignIndividual({offer:{mockup:'case.png',oldPrice:'R$ 430,24',salePrice:'R$ 299,89'},accent:'#ff5500'})");assert.ok(JSON.stringify(tree).includes('PROMOÇÃO SUJEITA'));assert.ok(JSON.stringify(tree).includes('R$ 299,89'));assert.equal(nodes(tree,n=>n.type==='img')[0].props.src,'case.png');
+ const hidden=run("CampaignIndividual({offer:{oldPrice:'R$ 430,24',salePrice:'R$ 299,89',offerShowPrice:false,campaignNotice:''},accent:'#ff5500'})");assert.equal(nodes(hidden,n=>n.type==='del').length,0);assert.ok(!JSON.stringify(hidden).includes('R$ 299,89'));
 });
