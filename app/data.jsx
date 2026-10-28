@@ -35,7 +35,9 @@ const TAGS = [
 const TEMPLATES = [
   { id:'carousel', label:'CARROSSEL',      ratio:'4:5', w:1080, h:1350, note:'Quantidade livre de páginas' },
   { id:'bfbanner', label:'BANNER BLACK FRIDAY', ratio:'100:29', w:1500, h:435, note:'Desktop + Mobile · até 5 jogos' },
-  { id:'physicalmonth', label:'MÊS DA MÍDIA FÍSICA', ratio:'4:5', w:1080, h:1350, note:'Vitrine · mockups · ofertas · carrossel' },
+  { id:'physicalhighlights', label:'MÊS DA MÍDIA FÍSICA DESTAQUE', ratio:'4:5', w:1080, h:1350, note:'Marca + até 4 jogos com capa' },
+  { id:'physicallist', label:'MÊS DA MÍDIA FÍSICA LISTA', ratio:'4:5', w:1080, h:1350, note:'Duas colunas · até 4 marcas' },
+  { id:'physicalmonth', label:'MÊS DA MÍDIA FÍSICA INDIVIDUAL', ratio:'4:5', w:1080, h:1350, note:'Arte + mockup + preço' },
   { id:'block',    label:'POST BLOCADO',   ratio:'4:5', w:1080, h:1350, note:'Tipografia forte, cor sólida' },
   { id:'image',    label:'POST C/ IMAGEM', ratio:'4:5', w:1080, h:1350, note:'Texto + imagem em destaque' },
   { id:'quiz',     label:'QUIZ',           ratio:'4:5', w:1080, h:1350, note:'Pergunta ou “esse ou aquele”' },
@@ -183,13 +185,18 @@ const BANNER_CAMPAIGNS = {
   month:{bannerTitle:'MÊS DA',bannerSecondLine:'MÍDIA FÍSICA',bannerPeriod:'NOVEMBRO',bannerSubtitle:'Seu próximo jogo merece um lugar na coleção',bannerSignature:'Em novembro, o jogo é seu',bannerCta:'EXPLORE A SELEÇÃO'},
 };
 
-function isOfferTemplate(id){ return id==='blackfriday'||id==='physicalmonth'; }
+function isCampaignTemplate(id){return ['physicalmonth','physicalhighlights','physicallist'].includes(id);}
+function isOfferTemplate(id){ return id==='blackfriday'||isCampaignTemplate(id); }
 function offerLayout(offer,template){ return offer.offerLayout || (template==='blackfriday' && !offer.mockup ? 'poster':'showcase'); }
 function duplicateOfferPage(state){
   const source=state.current===0?state:(state.pages[state.current-1]||{});
-  const fields=['title','oldPrice','salePrice','offerNote','image','imageX','imageY','imageZoom','imageBlur','mockup','mockupScale','mockupRotate','mockupX','mockupY','offerLayout','offerBg','offerBgColor','offerAccent','offerShade','offerPlatform','offerEdition','offerBadge','offerDescription','offerCta','offerShowPrice','offerFrame','offerTitleSize'];
-  const copy=Object.fromEntries(fields.filter(k=>source[k]!==undefined).map(k=>[k,source[k]]));
+  const fields=['title','oldPrice','salePrice','offerNote','image','imageX','imageY','imageZoom','imageBlur','mockup','mockupScale','mockupRotate','mockupX','mockupY','offerLayout','offerBg','offerBgColor','offerAccent','offerShade','offerPlatform','offerEdition','offerBadge','offerDescription','offerCta','offerShowPrice','offerFrame','offerTitleSize','campaignItems','campaignGroups','campaignItemCount','campaignGroupCount','campaignHeading','campaignBrandLogo','campaignBrandName','campaignNotice','campaignShowTitle','campaignBg'];
+  const copy=JSON.parse(JSON.stringify(Object.fromEntries(fields.filter(k=>source[k]!==undefined).map(k=>[k,source[k]]))));
   const pages=Object.fromEntries(Object.entries(state.pages||{}).map(([k,v])=>[Number(k)>=state.pageCount-1?Number(k)+1:k,v]));
   pages[state.pageCount-1]=copy;
   return {...state,pages,current:state.pageCount,pageCount:state.pageCount+1};
 }
+
+function campaignCount(value,fallback,max){const n=Number(value);return Number.isInteger(n)&&n>=1?Math.min(n,max):fallback;}
+function campaignItems(offer){const items=Array.isArray(offer.campaignItems)?offer.campaignItems:[];return Array.from({length:campaignCount(offer.campaignItemCount,4,4)},(_,i)=>items[i]&&typeof items[i]==='object'?items[i]:{});}
+function campaignGroups(offer){const groups=Array.isArray(offer.campaignGroups)?offer.campaignGroups:[];return Array.from({length:campaignCount(offer.campaignGroupCount,2,4)},(_,i)=>{const g=groups[i]&&typeof groups[i]==='object'?groups[i]:{};const items=Array.isArray(g.items)?g.items:[];return {...g,items:Array.from({length:campaignCount(g.count,6,12)},(_,j)=>items[j]&&typeof items[j]==='object'?items[j]:{})};});}

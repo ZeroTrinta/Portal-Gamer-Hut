@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+<defs>
+ <radialGradient id="fire"><stop stop-color="#ff6508" stop-opacity=".7"/><stop offset=".3" stop-color="#b84102" stop-opacity=".5"/><stop offset="1" stop-color="#050504" stop-opacity="0"/></radialGradient>
+ <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".58" numOctaves="3" seed="27" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncR type="linear" slope="1.2"/><feFuncG type="linear" slope=".6"/><feFuncB type="linear" slope=".18"/><feFuncA type="linear" slope=".23"/></feComponentTransfer><feBlend in2="SourceGraphic" mode="screen"/></filter>
+ <filter id="sparks"><feTurbulence type="fractalNoise" baseFrequency=".32" numOctaves="2" seed="9"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncR type="discrete" tableValues="0 0 0 .5 1"/><feFuncG type="discrete" tableValues="0 0 0 .15 .45"/><feFuncB type="discrete" tableValues="0 0 0 0 .02"/></feComponentTransfer></filter>
+ <radialGradient id="fade"><stop stop-color="white"/><stop offset="1" stop-color="black"/></radialGradient>
+ <mask id="corners"><rect width="1080" height="1920" fill="black"/><ellipse cx="50" cy="1460" rx="450" ry="600" fill="url(#fade)"/><ellipse cx="1070" cy="1360" rx="460" ry="700" fill="url(#fade)"/></mask>
+</defs>
+<rect width="1080" height="1920" fill="#050504"/>
+<ellipse cx="-50" cy="1470" rx="530" ry="640" fill="url(#fire)"/><ellipse cx="1130" cy="1340" rx="560" ry="810" fill="url(#fire)"/>
+<rect width="1080" height="1920" filter="url(#grain)" opacity=".14"/>
+<rect width="1080" height="1920" filter="url(#sparks)" mask="url(#corners)" opacity=".5"/>
+</svg>

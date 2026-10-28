@@ -19,11 +19,11 @@ Depois abra `http://localhost:8080`.
 
 ## Modelos disponíveis
 
-- **Mês da Mídia Física** — carrossel sem limite fixo de ofertas (mínimo 1) em 1080×1350. Cada página
-  tem arte do jogo ao fundo (com zoom e posição), nome, preço anterior riscado,
-  preço promocional em destaque e condição opcional. A cor segue a categoria.
-  Selecione o modelo no Studio, preencha os preços e use **Exportar PNG** ou
-  **Todas**. Os preços não são consultados automaticamente.
+- **Mês da Mídia Física Destaque** — até quatro jogos com capas, logo da marca e preços.
+- **Mês da Mídia Física Lista** — até quatro blocos de marcas, com listas em duas colunas.
+- **Mês da Mídia Física Individual** — arte de fundo, mockup opcional e promoção em destaque.
+  Os três são carrosséis sem limite fixo de páginas, com Feed e Stories, sem capa obrigatória.
+  Os preços são preenchidos manualmente.
 
 - **Carrossel** — páginas sequenciais sem limite fixo (mínimo 3) (capa + conteúdo). Inclui o tipo de
   página **Vídeo**: card horizontal 16:9 com trailer tocando e **exportação em
@@ -92,35 +92,30 @@ O primeiro usa o período de 10 a 12 de outubro das referências; revise as data
 cada campanha. Aplicar um conjunto substitui textos e limpa preços/desconto,
 preservando imagens e formato. Trocar apenas o formato preserva todos os campos.
 
-## Mês da Mídia Física — editor de ofertas
+## Mês da Mídia Física — três versões da campanha
 
-O modelo **MÊS DA MÍDIA FÍSICA** oferece um editor
-avançado de carrossel 1080 × 1350, sem limite editorial de páginas:
+- **Destaque:** título editável, logo opcional abaixo dele e de um a quatro jogos
+  por página. Cada jogo tem capa, nome, plataforma, preço anterior riscado e promoção.
+- **Lista:** de um a quatro blocos com logo ou nome de marca e até 12 jogos por
+  bloco. Blocos 1 e 3 ficam à esquerda; 2 e 4, à direita. Cada linha tem nome,
+  plataforma e os dois preços. Distribua listas muito extensas entre páginas.
+- **Individual:** imagem de fundo, mockup opcional com escala, rotação e posição,
+  título opcional, plataforma, preços, condição e aviso de estoque editável.
 
-- **Vitrine**, **Lado a lado** e **Arte em destaque**, escolhidos por oferta.
-- Mockup independente do fundo: PNG recortado ou capa, com tamanho, rotação,
-  deslocamento horizontal/vertical e acabamento de caixa opcional.
-- Fundos **Estúdio com luz**, **Grade retrô**, **Faixas diagonais**, **Cor sólida**
-  e **Imagem enviada**, com cor de destaque, cor de fundo e escurecimento.
-- Imagem de fundo por página, com enquadramento, zoom e desfoque.
-- Plataforma, edição, título, descrição, selo/desconto manual, preço anterior
-  riscado, preço promocional, condição e chamada final. O bloco de preço pode
-  ser ocultado. Preços e descontos não são inventados nem consultados automaticamente.
-- **Duplicar esta oferta no final** copia os campos criativos e mantém as outras
-  páginas, inclusive as ocultadas ao reduzir a quantidade.
+Todos têm fundo preto com textura e brilho laranja, imagem enviada ou cor sólida.
+A imagem aceita enquadramento, zoom, desfoque e escurecimento. Logos, conteúdo,
+cores e aviso podem ser personalizados por página. Não é necessário criar capa.
 
-O exportador detecta textos que não cabem e pede para encurtá-los. Ajuste o tamanho
-do título para nomes longos. Os campos antigos de preço e imagem do Black Friday
-continuam compatíveis; páginas antigas sem mockup abrem em Arte em destaque.
-As opções são individuais por página. Os banners desktop/mobile continuam disponíveis.
+**Duplicar esta oferta no final** copia também jogos, grupos e logos sem vincular
+as edições entre páginas. O exportador detecta textos que não cabem e pede para
+encurtá-los ou distribuir os jogos em mais páginas. Preços vazios são omitidos.
 
-Validação desta atualização: 12 testes automatizados e testes no Chromium das três
-composições nos dois modelos, incluindo duplicação pela interface. PNGs nativos das
-três composições do Mês da Mídia Física foram exportados e inspecionados.
+O antigo carrossel Black Friday continua fora da seleção. Seus dados salvos de
+imagem, preço e páginas são reaproveitados no Individual, com a nova composição.
+O banner Black Friday desktop/mobile permanece disponível.
 
-O carrossel Black Friday foi retirado da seleção por duplicar o Mês da Mídia Física.
-Projetos antigos são migrados automaticamente, preservando imagens, preços, páginas
-e composição. O banner Black Friday desktop/mobile permanece disponível.
+Validação: 21 testes automatizados, edição e duplicação pela interface e exportação
+PNG no Chromium das três versões em Feed e Stories.
 
 ### Stories do carrossel
 
