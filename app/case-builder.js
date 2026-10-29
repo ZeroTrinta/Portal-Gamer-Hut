@@ -1,5 +1,5 @@
 const CASE_MODELS={
- ps5:{src:'ps5.png',area:[38,183,957,1091],outerRadius:32},
+ ps5:{src:'ps5.png',area:[0,183,995,1091],outerRadius:32},
  ps4:{src:'ps4.png',area:[4,183,1073,1187]},
  switch2:{src:'switch2.png',area:[10,302,1192,1693]},
  switch:{src:'switch.png',area:[5,26,583,948],logo:'switch-logo.png',logoArea:[5,26,129,126]}
