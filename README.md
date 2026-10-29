@@ -133,3 +133,16 @@ superior direito de todos os slides do carrossel. Vale para o carrossel padrão 
 o Mês da Mídia Física, em Feed e Stories, e para exportações PNG e vídeo. A navegação
 do editor permanece disponível. A preferência é salva junto ao projeto; por padrão
 o contador continua visível.
+
+## Recorte de mockup
+
+No topo do Studio, **Recorte de mockup** abre uma aba independente para PS5 e
+Nintendo Switch. Envie PNG/JPG/WebP (até 20 MB), confira a detecção do retângulo
+externo e ajuste os quatro cantos arrastando ou pelos campos X/Y. A opção de
+proporção frontal usa o formato escolhido sem esticar a imagem. Para caixas em
+perspectiva, mantenha-a desmarcada e ajuste os cantos manualmente.
+
+O recorte preserva o branco interno da caixa. Sombras, margens brancas sem borda
+visível e fundos complexos podem exigir ajuste manual. Imagens acima de 2400 px
+no maior lado são reduzidas para manter o processamento local leve. Baixe o PNG
+transparente e envie-o no campo de mockup da arte.
