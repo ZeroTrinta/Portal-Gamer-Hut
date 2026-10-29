@@ -467,7 +467,7 @@ function TopBar({ s, dims, tag, busy, isVideoPage, onExport, onExportAll, onExpo
         </a>
         <div style={{ borderLeft:`1px solid ${GH.lineSoft}`, paddingLeft:14 }}>
           <div className="gh-pixel" style={{ color:GH.white, fontSize:12, letterSpacing:'.02em' }}>CREATIVE STUDIO</div>
-          <a href="mockup.html" target="_blank" rel="noopener" style={{color:GH.orange,fontSize:12}}>✂ Recorte de mockup ↗</a>
+          <a href="mockup.html" target="_blank" rel="noopener" style={{color:GH.orange,fontSize:12}}>Montar mockup ↗</a>
           <div className="gh-mono" style={{ color:GH.mut, fontSize:10, letterSpacing:'.18em', marginTop:3 }}>AUTOMAÇÃO DE CRIATIVOS</div>
         </div>
       </div>
