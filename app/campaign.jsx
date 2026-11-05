@@ -59,11 +59,11 @@ function CampaignList({offer,accent}){
       {columns.filter(col=>col.length).map((col,ci)=>{
         const headers=col.filter(g=>g.logo||g.name).length*78;
         const rowH=(985-headers-(col.length-1)*24)/col.reduce((sum,g)=>sum+g.items.length,0);
-        const font=Math.max(14,Math.min(26,(rowH-8)/4.8));
+        const font=Math.max(14,Math.min(26,(rowH-32)/4.8));
         return <div key={ci} style={{minWidth:0,display:'flex',flexDirection:'column',gap:24}}>
           {col.map((group,gi)=><div key={gi} data-campaign-group style={{minWidth:0}}>
             {(group.logo||group.name) && <div style={{height:78,paddingBottom:16}}><CampaignBrand logo={group.logo} name={group.name} height={62}/></div>}
-            {group.items.map((item,i)=><div key={i} data-campaign-fit style={{height:rowH,boxSizing:'border-box',padding:'4px 0',borderBottom:`1px solid ${accent}`,display:'flex',flexDirection:'column',justifyContent:'space-between',overflow:'hidden'}}>
+            {group.items.map((item,i)=><div key={i} data-campaign-fit style={{height:rowH,boxSizing:'border-box',padding:'10px 0 14px',borderBottom:`1px solid ${accent}`,display:'flex',flexDirection:'column',justifyContent:'flex-start',gap:4,overflow:'hidden'}}>
               <div data-campaign-fit className="gh-display" style={{...campaignText,fontSize:font,lineHeight:1.1,maxHeight:font*2.25,flexShrink:0}}>{item.title||'NOME DO JOGO'}</div>
               {item.platform && <div data-campaign-fit className="gh-display" style={{...campaignText,fontSize:Math.max(13,font-2),lineHeight:1.1,color:accent,maxHeight:font+2,flexShrink:0}}>{item.platform}</div>}
               <div style={{display:'flex',alignItems:'baseline',justifyContent:'space-between',gap:8,flexShrink:0}}>
